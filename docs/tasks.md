@@ -36,3 +36,9 @@ This document breaks down the implementation into atomic, testable units to avoi
 - [x] **T019:** Implement `internal/infra/ai` (Agnostic LLM Provider interface + OpenAI/Anthropic adapters).
 - [x] **T020:** Implement Constitutional Prompting (Inject constitution + CoT reasoning JSON format).
 - [x] **T021:** Implement Shadow Mode & FinOps Budget Gate (LLMCognitor with server-side MAD validation).
+
+## Phase 7: El Panóptico (Frontend)
+- [x] **T022:** Initialize Next.js frontend with dark theme and premium design.
+- [x] **T023:** Create Prisoner Dashboard (Real-time vitals, WebSocket connection).
+- [x] **T024:** Create Twins Control Panel (Decision history, Shadow Mode toggle).
+- [x] **T025:** Create VAR Replay viewer (Event timeline with filtering).

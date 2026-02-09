@@ -1,0 +1,254 @@
+/* El Panóptico - Global Styles */
+/* Dark theme with premium prison aesthetic */
+
+:root {
+  /* Prison Color Palette */
+  --bg-void: #0a0a0c;
+  --bg-cell: #111114;
+  --bg-corridor: #18181c;
+  --bg-surface: #222228;
+  
+  /* Accent Colors */
+  --twins-red: #dc2626;
+  --twins-glow: #ef4444;
+  --sanity-green: #22c55e;
+  --loyalty-blue: #3b82f6;
+  --warning-amber: #f59e0b;
+  --danger-crimson: #b91c1c;
+  
+  /* Text */
+  --text-primary: #f4f4f5;
+  --text-secondary: #a1a1aa;
+  --text-muted: #71717a;
+  
+  /* Borders & Effects */
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-glow: rgba(220, 38, 38, 0.4);
+  --shadow-red: 0 0 40px rgba(220, 38, 38, 0.15);
+  
+  /* Typography */
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  --font-display: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  max-width: 100vw;
+  min-height: 100vh;
+  overflow-x: hidden;
+  background: var(--bg-void);
+  color: var(--text-primary);
+  font-family: var(--font-display);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-cell);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--bg-surface);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--twins-red);
+}
+
+/* Utility Classes */
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.glass {
+  background: rgba(17, 17, 20, 0.8);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border-subtle);
+}
+
+.glow-red {
+  box-shadow: var(--shadow-red);
+}
+
+/* Stat Bars */
+.stat-bar {
+  height: 8px;
+  background: var(--bg-cell);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.stat-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s ease-out;
+}
+
+.stat-bar-fill.sanity {
+  background: linear-gradient(90deg, var(--twins-red), var(--sanity-green));
+}
+
+.stat-bar-fill.loyalty {
+  background: linear-gradient(90deg, var(--danger-crimson), var(--loyalty-blue));
+}
+
+/* Cards */
+.card {
+  background: var(--bg-cell);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.2s ease;
+}
+
+.card:hover {
+  border-color: var(--twins-red);
+  box-shadow: var(--shadow-red);
+}
+
+/* Headings */
+h1, h2, h3, h4 {
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+h1 {
+  font-size: 2.5rem;
+  background: linear-gradient(135deg, var(--twins-red), var(--warning-amber));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  background: var(--twins-red);
+  color: white;
+}
+
+.btn-primary:hover {
+  background: var(--twins-glow);
+  box-shadow: 0 0 20px rgba(220, 38, 38, 0.4);
+}
+
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+}
+
+.btn-ghost:hover {
+  border-color: var(--twins-red);
+  color: var(--text-primary);
+}
+
+/* Status Indicators */
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+.status-dot.online {
+  background: var(--sanity-green);
+}
+
+.status-dot.offline {
+  background: var(--text-muted);
+  animation: none;
+}
+
+.status-dot.danger {
+  background: var(--twins-red);
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Event Timeline */
+.timeline-event {
+  position: relative;
+  padding-left: 24px;
+  border-left: 2px solid var(--bg-surface);
+  margin-left: 8px;
+}
+
+.timeline-event::before {
+  content: '';
+  position: absolute;
+  left: -6px;
+  top: 4px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--bg-surface);
+}
+
+.timeline-event.negative::before {
+  background: var(--twins-red);
+}
+
+.timeline-event.positive::before {
+  background: var(--sanity-green);
+}
+
+/* Twin's Eye Logo */
+.twins-eye {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--twins-red), var(--danger-crimson));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 30px rgba(220, 38, 38, 0.5);
+  animation: watchful 4s ease-in-out infinite;
+}
+
+@keyframes watchful {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+/* Shadow Mode Indicator */
+.shadow-mode-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid var(--warning-amber);
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--warning-amber);
+}
