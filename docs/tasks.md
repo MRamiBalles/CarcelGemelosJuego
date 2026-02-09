@@ -3,14 +3,14 @@
 This document breaks down the implementation into atomic, testable units to avoid God Components and Architectural Smells.
 
 ## Phase 0: Infrastructure & Project Scaffolding
-- [ ] **T001:** Setup Go Workspace Structure (`cmd/`, `internal/domain`, `internal/infra`).
-- [ ] **T002:** Initialize `go.mod` and add core dependencies (Websockets, Loggers).
-- [ ] **T003:** Implement `internal/platform/logger` (Structured logging for tracing "The Twins" actions).
+- [x] **T001:** Setup Go Workspace Structure (`cmd/`, `internal/domain`, `internal/infra`).
+- [x] **T002:** Initialize `go.mod` and add core dependencies (Websockets, Loggers).
+- [x] **T003:** Implement `internal/platform/logger` (Structured logging for tracing "The Twins" actions).
 
 ## Phase 1: Domain Entities & Game State
-- [ ] **T004:** Define `internal/domain/prisoner` structs (Sanity, Loyalty, Archetype traits).
-- [ ] **T005:** Implement `internal/domain/events` (Immutable Event log for the "VAR of Betrayal").
-- [ ] **T006:** Define `internal/domain/rules` (Pure functions for Hunger/Sanity/Noise calculations).
+- [x] **T004:** Define `internal/domain/prisoner` structs (Sanity, Loyalty, Archetype traits).
+- [x] **T005:** Implement `internal/domain/events` (Immutable Event log for the "VAR of Betrayal").
+- [x] **T006:** Define `internal/domain/rules` (Pure functions for Hunger/Sanity/Noise calculations).
 
 ## Phase 2: Core Game Logic (The Twins Engine)
 - [ ] **T007:** Implement `internal/engine/ticker` (The server heartbeat for resource depletion).
