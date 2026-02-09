@@ -47,3 +47,8 @@ This document breaks down the implementation into atomic, testable units to avoi
 - [x] **T026:** Docker containerization (Multi-stage builds for Go/Next.js).
 - [x] **T027:** Docker Compose orchestration (server, client, postgres, redis).
 - [x] **T028:** GitHub Actions CI/CD pipeline (tests, lint, build).
+
+## Phase 9: El Motín (Stress Testing & Observability)
+- [x] **T029:** Load generator tool (50 concurrent WebSocket clients, 100ms actions).
+- [x] **T030:** Observability metrics endpoint (Tick Lag, Event Write Latency).
+- [x] **T031:** Concurrency optimization (channel buffers, DB indexes).
