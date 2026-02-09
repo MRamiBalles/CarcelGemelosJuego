@@ -6,7 +6,13 @@ This plan defines the "How," focusing on mitigating **Architectural Technical De
 
 To support the 1-week persistent reality show, we use a decentralized-authoritative model.
 
-*   **Logic Master:** Authoritative Game Server written in **Go** (for high concurrency and performance).
+*   **Logic Master:** Authoritative Game Server written in **Go**.
+*   **Architecture Pattern:** **Clean Architecture** (Separation of Concerns).
+    - `/cmd`: Entry points for the jail-server.
+    - `/internal/domain`: Pure logic (Prisoner stats, Sanity rules).
+    - `/internal/engine`: Simulation ticker and event processing.
+    - `/internal/events`: Event Sourcing (The VAR).
+    - `/internal/network`: Agnostic WebSocket management.
 *   **State Persistence:** **Event Sourcing** using a combination of **PostgreSQL** and **Redis**.
     -   **The "VAR of Betrayal":** Every interaction (resource intake, chat, skill use) is an immutable event with a timestamp. This allows the system to generate "Replays" (JSON/Video-lite) to expose lies to the audience or cellmates.
 *   **Client Communication:** **WebSockets** with binary serialization (Protobuf) for movement, and a separate **Pub/Sub** channel for environmental "Noise Events".
