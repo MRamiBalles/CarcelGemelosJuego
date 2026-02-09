@@ -26,3 +26,8 @@ This document breaks down the implementation into atomic, testable units to avoi
 - [x] **T013:** Implement WebSocket Hub (`internal/network/hub.go`).
 - [x] **T014:** Create the `AudienceBridge` (Mobile-to-Server "Pay-to-Torture" API).
 - [x] **T015:** Implement the "VAR Replay" endpoint (JSON export of betrayal history).
+
+## Phase 5: The Twin Minds (Agentic AI)
+- [x] **T016:** Implement `internal/twins/perception` (EventLog summarizer for LLM context).
+- [x] **T017:** Implement `internal/twins/cognition` (MAD-BAD-SAD decision framework).
+- [x] **T018:** Implement `internal/twins/action` (System event emitter for punishments/rewards).
