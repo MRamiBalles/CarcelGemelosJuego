@@ -31,3 +31,8 @@ This document breaks down the implementation into atomic, testable units to avoi
 - [x] **T016:** Implement `internal/twins/perception` (EventLog summarizer for LLM context).
 - [x] **T017:** Implement `internal/twins/cognition` (MAD-BAD-SAD decision framework).
 - [x] **T018:** Implement `internal/twins/action` (System event emitter for punishments/rewards).
+
+## Phase 6: LLM Integration & Shadow Mode
+- [x] **T019:** Implement `internal/infra/ai` (Agnostic LLM Provider interface + OpenAI/Anthropic adapters).
+- [x] **T020:** Implement Constitutional Prompting (Inject constitution + CoT reasoning JSON format).
+- [x] **T021:** Implement Shadow Mode & FinOps Budget Gate (LLMCognitor with server-side MAD validation).
