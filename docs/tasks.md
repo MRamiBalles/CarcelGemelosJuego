@@ -23,6 +23,6 @@ This document breaks down the implementation into atomic, testable units to avoi
 - [x] **T012:** Implement Redis cache + Reality Recap reconstructor.
 
 ## Phase 4: Networking & External Bridges
-- [ ] **T013:** Implement WebSocket Server (`internal/network/ws`).
-- [ ] **T014:** Create the `AudienceBridge` (Mobile-to-Server API for Sadism Points).
-- [ ] **T015:** Implement the "VAR Replay" endpoint (JSON export of betrayal history).
+- [/] **T013:** Implement WebSocket Server (`internal/network/ws`).
+- [/] **T014:** Create the `AudienceBridge` (Mobile-to-Server API for Sadism Points).
+- [/] **T015:** Implement the "VAR Replay" endpoint (JSON export of betrayal history).
