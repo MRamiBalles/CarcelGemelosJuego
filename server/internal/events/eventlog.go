@@ -17,6 +17,9 @@ const (
 	EventTypeVote           EventType = "VOTE"
 	EventTypeBetrayal       EventType = "BETRAYAL"
 	EventTypePrivacyBreach  EventType = "PRIVACY_BREACH"
+	EventTypeTimeTick       EventType = "TIME_TICK"
+	EventTypeSanityChange   EventType = "SANITY_CHANGE"
+	EventTypeLoyaltyChange  EventType = "LOYALTY_CHANGE"
 )
 
 // GameEvent represents an immutable record of an action in the game.
@@ -86,4 +89,19 @@ func (el *EventLog) Replay() []GameEvent {
 	el.mu.RLock()
 	defer el.mu.RUnlock()
 	return el.events
+}
+
+// GenerateEventID creates a unique event identifier.
+func GenerateEventID() string {
+	return time.Now().Format("20060102150405") + "-" + randomSuffix()
+}
+
+// randomSuffix generates a short random string.
+func randomSuffix() string {
+	const letters = "abcdefghijklmnopqrstuvwxyz0123456789"
+	b := make([]byte, 6)
+	for i := range b {
+		b[i] = letters[time.Now().UnixNano()%int64(len(letters))]
+	}
+	return string(b)
 }

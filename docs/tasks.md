@@ -13,9 +13,9 @@ This document breaks down the implementation into atomic, testable units to avoi
 - [x] **T006:** Define `internal/domain/rules` (Pure functions for Hunger/Sanity/Noise calculations).
 
 ## Phase 2: Core Game Logic (The Twins Engine)
-- [ ] **T007:** Implement `internal/engine/ticker` (The server heartbeat for resource depletion).
-- [ ] **T008:** Implement `internal/engine/noise` (Managing the timing and Sanity drain of audio tortures).
-- [ ] **T009:** Implement `internal/engine/loyalty` (Managing the Duo Dilemma logic and loyalty bar logic).
+- [x] **T007:** Implement `internal/engine/ticker` (The server heartbeat for resource depletion).
+- [x] **T008:** Implement `internal/engine/noise` (Managing the timing and Sanity drain of audio tortures).
+- [x] **T009:** Implement `internal/engine/sanity_system` (Subscriber to NoiseEvents, emits SanityChangeEvents).
 
 ## Phase 3: Persistence & Event Sourcing
 - [ ] **T010:** Hook up Postgres for relational entity state (Player accounts).
