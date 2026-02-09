@@ -18,9 +18,9 @@ This document breaks down the implementation into atomic, testable units to avoi
 - [x] **T009:** Implement `internal/engine/sanity_system` (Subscriber to NoiseEvents, emits SanityChangeEvents).
 
 ## Phase 3: Persistence & Event Sourcing
-- [ ] **T010:** Hook up Postgres for relational entity state (Player accounts).
-- [ ] **T011:** Implement Redis-based Pub/Sub for real-time Event Sourcing broadcasts.
-- [ ] **T012:** Implement the "Reality Recap" reconstructor (Build state from Event logs).
+- [/] **T010:** Design PostgreSQL schema for append-only event log (Immutable Ledger).
+- [/] **T011:** Implement `EventRepository` in `internal/infra/storage` (Domain-agnostic interface).
+- [/] **T012:** Implement Redis cache for quick state snapshots (Sanity/Loyalty reads).
 
 ## Phase 4: Networking & External Bridges
 - [ ] **T013:** Implement WebSocket Server (`internal/network/ws`).
