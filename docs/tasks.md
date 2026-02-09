@@ -42,3 +42,8 @@ This document breaks down the implementation into atomic, testable units to avoi
 - [x] **T023:** Create Prisoner Dashboard (Real-time vitals, WebSocket connection).
 - [x] **T024:** Create Twins Control Panel (Decision history, Shadow Mode toggle).
 - [x] **T025:** Create VAR Replay viewer (Event timeline with filtering).
+
+## Phase 8: La Jaula de Hierro (DevOps & CI/CD)
+- [x] **T026:** Docker containerization (Multi-stage builds for Go/Next.js).
+- [x] **T027:** Docker Compose orchestration (server, client, postgres, redis).
+- [x] **T028:** GitHub Actions CI/CD pipeline (tests, lint, build).

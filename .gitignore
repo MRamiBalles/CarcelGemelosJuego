@@ -1,0 +1,45 @@
+# Cárcel de los Gemelos - .gitignore
+
+# ===== Environment =====
+.env
+.env.local
+.env.*.local
+
+# ===== Go =====
+server/bin/
+server/vendor/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+coverage.out
+
+# ===== Node.js =====
+client/node_modules/
+client/.next/
+client/out/
+client/.pnpm-store/
+
+# ===== IDE =====
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# ===== OS =====
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ===== Docker =====
+*.log
+docker-compose.override.yml
+
+# ===== Secrets (NEVER commit) =====
+*.pem
+*.key
+secrets/
