@@ -51,6 +51,15 @@ type RevealRequest struct {
 	AudienceID string `json:"audience_id"`
 }
 
+// OracleRequest is the payload for the "Painful Truth" mechanic.
+type OracleRequest struct {
+	GameID      string `json:"game_id"`
+	TargetID    string `json:"target_id"` // Prisoner to receive the whisper
+	Message     string `json:"message"`   // The "Truth"
+	SadismCost  int    `json:"sadism_cost"`
+	AudienceID  string `json:"audience_id"`
+}
+
 // HandleTorture is the endpoint for audience-triggered noise events.
 // POST /api/audience/torture
 func (ab *AudienceBridge) HandleTorture(w http.ResponseWriter, r *http.Request) {
@@ -75,7 +84,14 @@ func (ab *AudienceBridge) HandleTorture(w http.ResponseWriter, r *http.Request) 
 
 	// Trigger the torture via NoiseManager
 	reason := "AUDIENCE_VOTE:" + req.AudienceID
-	ab.noiseManager.TriggerPunishment(req.TargetZone, reason)
+	
+	if req.NoiseType == "AUDIO_TORTURE" || req.Intensity >= 4 {
+		// Inescapable Audio
+		ab.noiseManager.TriggerAudioTorture(req.NoiseType, 60, req.TargetZone)
+	} else {
+		// Standard Noise
+		ab.noiseManager.TriggerPunishment(req.TargetZone, reason)
+	}
 
 	// Log the audience action
 	ab.logger.Event("AUDIENCE_TORTURE", req.AudienceID, 
@@ -95,6 +111,52 @@ func (ab *AudienceBridge) HandleTorture(w http.ResponseWriter, r *http.Request) 
 		"success":      true,
 		"message":      "Torture triggered",
 		"sadism_spent": req.SadismCost,
+	})
+}
+
+// HandleOracle triggers a private whisper to a prisoner.
+// POST /api/audience/oracle
+func (ab *AudienceBridge) HandleOracle(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		ab.jsonError(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var req OracleRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		ab.jsonError(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if req.GameID == "" || req.TargetID == "" || req.Message == "" {
+		ab.jsonError(w, "Missing fields", http.StatusBadRequest)
+		return
+	}
+
+	// Send Private Message (Whisper) via WebSocket
+	// We construct a specific event for the client to render as a "Voice in the Head"
+	msg := Message{
+		Type:      MsgTypeEvent,
+		Timestamp: time.Now().Unix(),
+		Payload: map[string]interface{}{
+			"event_type": "ORACLE_WHISPER",
+			"message":    req.Message,
+			"visual_effect": "DISTORTION_GLITCH", // Client effect
+		},
+	}
+	
+	// Broadcast with Target filter
+	ab.wsHub.broadcast <- BroadcastMessage{
+		GameID:  req.GameID,
+		Targets: []string{req.TargetID},
+		Message: msg,
+	}
+
+	ab.logger.Event("AUDIENCE_ORACLE", req.AudienceID, "Target:"+req.TargetID)
+
+	ab.jsonSuccess(w, map[string]interface{}{
+		"success": true,
+		"message": "Oracle whisper sent",
 	})
 }
 
@@ -167,6 +229,7 @@ func (ab *AudienceBridge) HandleGameStatus(w http.ResponseWriter, r *http.Reques
 // RegisterRoutes sets up the audience API routes.
 func (ab *AudienceBridge) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("/api/audience/torture", ab.HandleTorture)
+	mux.HandleFunc("/api/audience/oracle", ab.HandleOracle)
 	mux.HandleFunc("/api/audience/reveal", ab.HandleReveal)
 	mux.HandleFunc("/api/audience/status", ab.HandleGameStatus)
 }
