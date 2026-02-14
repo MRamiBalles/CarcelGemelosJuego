@@ -20,6 +20,10 @@ const (
 	EventTypeTimeTick       EventType = "TIME_TICK"
 	EventTypeSanityChange   EventType = "SANITY_CHANGE"
 	EventTypeLoyaltyChange  EventType = "LOYALTY_CHANGE"
+	EventTypeToiletUse      EventType = "TOILET_USE"
+	EventTypeDoorLock       EventType = "DOOR_LOCK"
+	EventTypeDoorOpen       EventType = "DOOR_OPEN"
+	EventTypeAudioTorture   EventType = "AUDIO_TORTURE"
 )
 
 // GameEvent represents an immutable record of an action in the game.

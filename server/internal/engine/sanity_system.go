@@ -102,6 +102,99 @@ func (ss *SanitySystem) OnNoiseEvent(noiseEvent events.GameEvent) {
 	}
 }
 
+// ToiletUsePayload carries data about a toilet usage action.
+type ToiletUsePayload struct {
+	ActorID string `json:"actor_id"`
+	CellID  string `json:"cell_id"`
+}
+
+// OnToiletUseEvent handles the "Toilet of Shame" mechanic.
+// If a prisoner uses the toilet while their cellmate is NOT facing the wall,
+// both take massive sanity damage.
+func (ss *SanitySystem) OnToiletUseEvent(event events.GameEvent) {
+	payload, ok := event.Payload.(ToiletUsePayload)
+	if !ok {
+		ss.logger.Error("Failed to parse ToiletUsePayload")
+		return
+	}
+
+	user, exists := ss.prisoners[payload.ActorID]
+	if !exists {
+		return
+	}
+
+	// 1. Apply Dignity Loss to User
+	user.Dignity -= 15
+	if user.Dignity < 0 {
+		user.Dignity = 0
+	}
+	ss.logger.Event("DIGNITY_LOSS", user.ID, "Used toilet openly")
+
+	// 2. Check for witnesses (Cellmates)
+	for _, neighbor := range ss.prisoners {
+		// Same cell, different person
+		if neighbor.CellID == user.CellID && neighbor.ID != user.ID {
+			// Check facing
+			isFacingWall := neighbor.HasState(prisoner.StateFacingWall)
+			
+			if !isFacingWall {
+				// PRIVACY BREACH!
+				
+				// Damage Witness
+				drainWitness := 20
+				// Mystic mitigation
+				if neighbor.Archetype == prisoner.ArchetypeMystic && neighbor.Sanity > 20 {
+					drainWitness /= 2
+				}
+				
+				neighbor.Sanity -= drainWitness
+				if neighbor.Sanity < 0 {
+					neighbor.Sanity = 0
+				}
+				
+				ss.emitSanityChange(neighbor.ID, -drainWitness, "PRIVACY_WITNESS", event.ID)
+
+				// Damage User (Shame)
+				drainUser := 10
+				user.Sanity -= drainUser
+				if user.Sanity < 0 {
+					user.Sanity = 0
+				}
+				ss.emitSanityChange(user.ID, -drainUser, "PRIVACY_VIOLATION", event.ID)
+			}
+		}
+	}
+}
+
+// emitSanityChange is a helper to log sanity changes
+func (ss *SanitySystem) emitSanityChange(targetID string, delta int, cause string, causeID string) {
+	p, exists := ss.prisoners[targetID]
+	if !exists {
+		return
+	}
+
+	payload := SanityChangePayload{
+		PrisonerID:   targetID,
+		PreviousSan:  p.Sanity - delta, // Approx
+		NewSanity:    p.Sanity,
+		Delta:        delta,
+		Cause:        cause,
+		CauseEventID: causeID,
+	}
+
+	event := events.GameEvent{
+		ID:        events.GenerateEventID(),
+		Timestamp: time.Now(),
+		Type:      events.EventTypeSanityChange,
+		ActorID:   "SYSTEM_SANITY",
+		TargetID:  targetID,
+		Payload:   payload,
+		GameDay:   p.DayInGame,
+	}
+
+	ss.eventLog.Append(event)
+}
+
 // ProcessWithdrawal handles Simon's 5-day "Cold Turkey" mechanic.
 func (ss *SanitySystem) ProcessWithdrawal(gameDay int) {
 	for _, p := range ss.prisoners {
@@ -123,25 +216,7 @@ func (ss *SanitySystem) ProcessWithdrawal(gameDay int) {
 			}
 
 			// Emit event for withdrawal effect
-			changePayload := SanityChangePayload{
-				PrisonerID:  p.ID,
-				PreviousSan: previousSanity,
-				NewSanity:   p.Sanity,
-				Delta:       sanityMod,
-				Cause:       "WITHDRAWAL",
-			}
-
-			changeEvent := events.GameEvent{
-				ID:        events.GenerateEventID(),
-				Timestamp: time.Now(),
-				Type:      events.EventTypeSanityChange,
-				ActorID:   "SYSTEM_SANITY",
-				TargetID:  p.ID,
-				Payload:   changePayload,
-				GameDay:   gameDay,
-			}
-
-			ss.eventLog.Append(changeEvent)
+			ss.emitSanityChange(p.ID, sanityMod, "WITHDRAWAL", "SYSTEM_TICK")
 		}
 	}
 }

@@ -47,12 +47,13 @@ func ProcessWithdrawal(p *prisoner.Prisoner) (sanityMod int, staminaMod int) {
 		return 0, 0
 	}
 
-	if p.DayInGame <= 5 && p.IsWithdraw {
+	// Use the new helper method instead of field access
+	if p.DayInGame <= 5 && p.IsWithdraw() {
 		// Debuff phase
 		return -5, -10
 	}
 
-	if p.DayInGame > 5 && !p.IsWithdraw { // Survived withdrawal
+	if p.DayInGame > 5 && !p.IsWithdraw() { // Survived withdrawal
 		// CLARITY buff
 		return 20, 10
 	}
