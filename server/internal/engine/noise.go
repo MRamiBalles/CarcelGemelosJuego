@@ -76,6 +76,30 @@ func (nm *NoiseManager) TriggerPunishment(targetZone string, reason string) {
 	nm.generateNoiseEvent(NoiseSiren, 3, 60, targetZone, reason)
 }
 
+// TriggerAudioTorture emits an inescapable audio event (bypassing volume settings).
+func (nm *NoiseManager) TriggerAudioTorture(soundID string, duration int, target string) {
+	payload := NoiseEventPayload{
+		NoiseType:   NoiseType(soundID),
+		Intensity:   4, // Critical intensity
+		DurationSec: duration,
+		TargetZone:  target,
+		Reason:      "AUDIO_TORTURE",
+	}
+
+	event := events.GameEvent{
+		ID:        events.GenerateEventID(),
+		Timestamp: time.Now(),
+		Type:      events.EventTypeAudioTorture,
+		ActorID:   "SYSTEM_TWINS",
+		Payload:   payload,
+		GameDay:   nm.currentDay,
+	}
+
+	nm.eventLog.Append(event)
+	nm.logger.Event("AUDIO_TORTURE", "TWINS", 
+		"Sound:"+soundID+" | Target:"+target)
+}
+
 // triggerRandomNoise generates a random noise event.
 func (nm *NoiseManager) triggerRandomNoise(reason string) {
 	noiseTypes := []NoiseType{NoiseSiren, NoiseCryingBaby, NoiseScratching, NoiseWhiteNoise, NoiseAlarm}

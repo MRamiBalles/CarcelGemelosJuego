@@ -102,6 +102,12 @@ func (ss *SanitySystem) OnNoiseEvent(noiseEvent events.GameEvent) {
 	}
 }
 
+// OnAudioTortureEvent handles inescapable audio torture.
+// It reuses the noise logic but the client treats it differently (bypass volume).
+func (ss *SanitySystem) OnAudioTortureEvent(event events.GameEvent) {
+	ss.OnNoiseEvent(event)
+}
+
 // ToiletUsePayload carries data about a toilet usage action.
 type ToiletUsePayload struct {
 	ActorID string `json:"actor_id"`

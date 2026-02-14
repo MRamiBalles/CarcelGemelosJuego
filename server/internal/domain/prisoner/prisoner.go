@@ -47,6 +47,7 @@ type Prisoner struct {
 	Sanity  int `json:"sanity"`  // 0-100 (0 = breakdown)
 	Dignity int `json:"dignity"` // 0-100 (privacy-based)
 	HP      int `json:"hp"`      // 0-100 (Physical Health)
+	Stamina int `json:"stamina"` // 0-100 (Energy/Fatigue)
 
 	// Economics
 	PotContribution float64 `json:"pot_contribution"` // Individual winnings
