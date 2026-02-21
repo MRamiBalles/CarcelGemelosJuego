@@ -13,10 +13,12 @@ interface Decision {
 interface TwinsControlPanelProps {
     decisions: Decision[];
     shadowMode: boolean;
+    isLockdown?: boolean;
+    day21Dilemmas?: { prisoner: string; decision: 'BETRAY' | 'COLLABORATE' | 'PENDING' }[];
     onToggleShadowMode: () => void;
 }
 
-export default function TwinsControlPanel({ decisions, shadowMode, onToggleShadowMode }: TwinsControlPanelProps) {
+export default function TwinsControlPanel({ decisions, shadowMode, isLockdown = false, day21Dilemmas = [], onToggleShadowMode }: TwinsControlPanelProps) {
     const actionEmoji: Record<string, string> = {
         NOISE_TORTURE: "🔊",
         REVEAL_SECRET: "👁️",
@@ -62,6 +64,46 @@ export default function TwinsControlPanel({ decisions, shadowMode, onToggleShado
                         </button>
                     </div>
                 </div>
+            </div>
+
+            {/* System Status Alerts */}
+            <div style={{ display: "flex", gap: "16px", marginBottom: "24px", flexWrap: "wrap" }}>
+                {/* Lockdown Indicator */}
+                <div className="card" style={{ flex: 1, minWidth: "250px", display: "flex", alignItems: "center", gap: "12px", borderLeft: isLockdown ? "4px solid var(--twins-red)" : "4px solid var(--sanity-green)" }}>
+                    <div style={{ fontSize: "24px" }}>{isLockdown ? "🔒" : "🔓"}</div>
+                    <div>
+                        <div style={{ fontWeight: 600, fontSize: "14px", color: isLockdown ? "var(--twins-red)" : "var(--sanity-green)" }}>
+                            {isLockdown ? "LOCKDOWN ACTIVO" : "Celdas Abiertas"}
+                        </div>
+                        <div style={{ fontSize: "12px", color: "var(--text-muted)" }}>
+                            {isLockdown ? "00:00 - 08:00 (Aislamiento)" : "Horario de Convivencia"}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Day 21 Dilemma */}
+                {day21Dilemmas.length > 0 && (
+                    <div className="card" style={{ flex: 2, minWidth: "300px", borderLeft: "4px solid var(--warning-amber)" }}>
+                        <div style={{ fontWeight: 600, fontSize: "14px", color: "var(--warning-amber)", marginBottom: "8px" }}>
+                            ⚖️ Dilema Final (Día 21)
+                        </div>
+                        <div style={{ display: "flex", gap: "16px" }}>
+                            {day21Dilemmas.map((d, i) => (
+                                <div key={i} style={{ flex: 1, background: "var(--bg-surface)", padding: "8px", borderRadius: "6px" }}>
+                                    <div style={{ fontSize: "12px", color: "var(--text-muted)", marginBottom: "4px" }}>{d.prisoner}</div>
+                                    <div style={{
+                                        fontSize: "13px",
+                                        fontWeight: 600,
+                                        color: d.decision === 'BETRAY' ? "var(--twins-red)" :
+                                            d.decision === 'COLLABORATE' ? "var(--sanity-green)" : "var(--text-secondary)"
+                                    }}>
+                                        {d.decision === 'PENDING' ? "⏳ ESPERANDO..." : d.decision === 'BETRAY' ? "🗡️ TRAICIÓN" : "🤝 COLABORACIÓN"}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Stats */}
