@@ -4,23 +4,32 @@
 package main
 
 import (
+	"context"
 	"log"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/MRamiBalles/CarcelGemelosJuego/server/internal/engine"
+	"github.com/MRamiBalles/CarcelGemelosJuego/server/internal/events"
+	"github.com/MRamiBalles/CarcelGemelosJuego/server/internal/platform/logger"
 )
 
 func main() {
 	log.Println("[JAIL-SERVER] Initializing 'Cárcel de los Gemelos' Authoritative Server...")
 
-	// TODO: Wire up dependencies (T002+)
-	// - IdentityService
-	// - SocialEngine
-	// - EnvironmentService (The Twins)
-	// - EventLog (The VAR)
-	// - Network (WebSockets)
+	appLogger := logger.NewLogger()
+	appLogger.Info("Bootstrapping EventLog...")
+	eventLog := events.NewEventLog()
 
-	// TODO: Start game loop ticker (T007)
+	appLogger.Info("Bootstrapping Engine Subsystems...")
+	gameEngine := engine.NewEngine(eventLog, appLogger)
+
+	// Start engine processing in background
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	gameEngine.Start(ctx)
+
 	// TODO: Start WebSocket listener (T013)
 
 	log.Println("[JAIL-SERVER] Server running. Press Ctrl+C to exit.")
