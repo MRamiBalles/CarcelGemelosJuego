@@ -37,8 +37,8 @@ type RebuiltState struct {
 type RecapEvent struct {
 	Timestamp  string `json:"timestamp"`
 	EventType  string `json:"event_type"`
-	Summary    string `json:"summary"`    // Human-readable description
-	Impact     string `json:"impact"`     // "POSITIVE", "NEGATIVE", "NEUTRAL"
+	Summary    string `json:"summary"` // Human-readable description
+	Impact     string `json:"impact"`  // "POSITIVE", "NEGATIVE", "NEUTRAL"
 	IsRevealed bool   `json:"is_revealed"`
 }
 
@@ -150,7 +150,7 @@ func (r *Reconstructor) summarizeEvent(event GameEvent, observerID string) strin
 		if event.TargetID == observerID {
 			return "Tu cordura fue afectada."
 		}
-		return fmt.Sprintf("La cordura de otro prisionero fue afectada.")
+		return "La cordura de otro prisionero fue afectada."
 	case "BETRAYAL":
 		return "Hubo una traición..."
 	default:

@@ -7,7 +7,6 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"time"
 )
 
 // PostgresEventRepository implements EventRepository using PostgreSQL.

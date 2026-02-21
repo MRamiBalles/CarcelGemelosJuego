@@ -4,6 +4,7 @@ package metrics
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"sync"
 	"sync/atomic"
@@ -13,16 +14,16 @@ import (
 // Collector gathers performance metrics.
 type Collector struct {
 	// Tick metrics
-	TickCount       int64
-	TickLatencySum  int64 // nanoseconds
-	TickLatencyMax  int64
-	LastTickTime    time.Time
+	TickCount      int64
+	TickLatencySum int64 // nanoseconds
+	TickLatencyMax int64
+	LastTickTime   time.Time
 
 	// Event metrics
-	EventsWritten      int64
-	EventWriteLatSum   int64
-	EventWriteLatMax   int64
-	EventWriteErrors   int64
+	EventsWritten    int64
+	EventWriteLatSum int64
+	EventWriteLatMax int64
+	EventWriteErrors int64
 
 	// WebSocket metrics
 	WSConnectionsActive int64
@@ -31,10 +32,10 @@ type Collector struct {
 	WSErrors            int64
 
 	// LLM metrics
-	LLMRequests       int64
-	LLMTokensUsed     int64
-	LLMCostUSD        float64
-	LLMLatencySum     int64
+	LLMRequests   int64
+	LLMTokensUsed int64
+	LLMCostUSD    float64
+	LLMLatencySum int64
 
 	// System
 	StartTime time.Time
@@ -142,10 +143,10 @@ func (c *Collector) Snapshot() map[string]interface{} {
 		},
 
 		"events": map[string]interface{}{
-			"written":           eventsWritten,
-			"avg_write_lat_ms":  eventAvg,
-			"max_write_lat_ms":  float64(atomic.LoadInt64(&c.EventWriteLatMax)) / 1e6,
-			"errors":            atomic.LoadInt64(&c.EventWriteErrors),
+			"written":          eventsWritten,
+			"avg_write_lat_ms": eventAvg,
+			"max_write_lat_ms": float64(atomic.LoadInt64(&c.EventWriteLatMax)) / 1e6,
+			"errors":           atomic.LoadInt64(&c.EventWriteErrors),
 		},
 
 		"websocket": map[string]interface{}{
@@ -226,6 +227,3 @@ func PrometheusHandler() http.HandlerFunc {
 		c.mu.RUnlock()
 	}
 }
-
-// Need fmt for Prometheus output
-import "fmt"

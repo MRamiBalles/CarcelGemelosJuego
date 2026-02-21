@@ -10,7 +10,6 @@ import (
 	"context"
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/MRamiBalles/CarcelGemelosJuego/server/internal/events"
 	"github.com/MRamiBalles/CarcelGemelosJuego/server/internal/platform/logger"
@@ -18,17 +17,17 @@ import (
 
 // PrisonState represents the current emotional/social state of the prison.
 type PrisonState struct {
-	GameID           string            `json:"game_id"`
-	CurrentDay       int               `json:"current_day"`
-	CurrentHour      int               `json:"current_hour"`
-	TotalPrisoners   int               `json:"total_prisoners"`
-	OnlinePrisoners  int               `json:"online_prisoners"`
-	AverageSanity    float64           `json:"average_sanity"`
-	TensionLevel     string            `json:"tension_level"` // LOW, MEDIUM, HIGH, CRITICAL
-	RecentBetrayals  int               `json:"recent_betrayals"`
-	AudienceActivity int               `json:"audience_activity"` // Sadism points spent recently
+	GameID            string            `json:"game_id"`
+	CurrentDay        int               `json:"current_day"`
+	CurrentHour       int               `json:"current_hour"`
+	TotalPrisoners    int               `json:"total_prisoners"`
+	OnlinePrisoners   int               `json:"online_prisoners"`
+	AverageSanity     float64           `json:"average_sanity"`
+	TensionLevel      string            `json:"tension_level"` // LOW, MEDIUM, HIGH, CRITICAL
+	RecentBetrayals   int               `json:"recent_betrayals"`
+	AudienceActivity  int               `json:"audience_activity"` // Sadism points spent recently
 	PrisonerSummaries map[string]string `json:"prisoner_summaries"`
-	NarrativeSummary string            `json:"narrative_summary"` // LLM-ready context
+	NarrativeSummary  string            `json:"narrative_summary"` // LLM-ready context
 }
 
 // Perceiver reads the EventLog and builds context for the Cognition module.
@@ -48,7 +47,7 @@ func NewPerceiver(el *events.EventLog, log *logger.Logger) *Perceiver {
 // BuildPrisonState analyzes recent events and builds a comprehensive state.
 func (p *Perceiver) BuildPrisonState(ctx context.Context, gameID string, currentDay int) (*PrisonState, error) {
 	allEvents := p.eventLog.Replay()
-	
+
 	state := &PrisonState{
 		GameID:            gameID,
 		CurrentDay:        currentDay,
@@ -57,11 +56,11 @@ func (p *Perceiver) BuildPrisonState(ctx context.Context, gameID string, current
 
 	// Analyze events from the last 3 game days
 	recentEvents := p.filterRecentEvents(allEvents, currentDay-3)
-	
+
 	// Count betrayals and calculate metrics
 	sanitySum := 0.0
 	sanityCount := 0
-	
+
 	for _, e := range recentEvents {
 		switch e.Type {
 		case events.EventTypeBetrayal:
@@ -74,7 +73,7 @@ func (p *Perceiver) BuildPrisonState(ctx context.Context, gameID string, current
 				}
 			}
 		}
-		
+
 		// Track audience activity
 		if strings.HasPrefix(e.ActorID, "AUDIENCE_") {
 			state.AudienceActivity++
@@ -155,7 +154,7 @@ func (p *Perceiver) calculateTensionLevel(state *PrisonState) string {
 }
 
 // buildNarrativeSummary creates an LLM-ready context string.
-func (p *Perceiver) buildNarrativeSummary(state *PrisonState, events []events.GameEvent) string {
+func (p *Perceiver) buildNarrativeSummary(state *PrisonState, gameEvents []events.GameEvent) string {
 	var sb strings.Builder
 
 	sb.WriteString(fmt.Sprintf("=== INFORME DE SITUACIÓN: DÍA %d ===\n", state.CurrentDay))
@@ -167,11 +166,11 @@ func (p *Perceiver) buildNarrativeSummary(state *PrisonState, events []events.Ga
 	// Add recent notable events
 	sb.WriteString("=== EVENTOS NOTABLES ===\n")
 	notable := 0
-	for _, e := range events {
+	for _, e := range gameEvents {
 		if notable >= 5 {
 			break // Limit to 5 notable events to control token usage
 		}
-		
+
 		switch e.Type {
 		case events.EventTypeBetrayal:
 			sb.WriteString(fmt.Sprintf("- [DÍA %d] TRAICIÓN: %s traicionó.\n", e.GameDay, e.ActorID))
@@ -193,11 +192,11 @@ func (p *Perceiver) buildNarrativeSummary(state *PrisonState, events []events.Ga
 }
 
 // GetPrisonerProfile builds a summary of a specific prisoner's recent behavior.
-func (p *Perceiver) GetPrisonerProfile(prisonerID string, events []events.GameEvent) string {
+func (p *Perceiver) GetPrisonerProfile(prisonerID string, gameEvents []events.GameEvent) string {
 	var actions []string
 	sanityHistory := []int{}
 
-	for _, e := range events {
+	for _, e := range gameEvents {
 		if e.ActorID == prisonerID || e.TargetID == prisonerID {
 			switch e.Type {
 			case events.EventTypeBetrayal:

@@ -1,8 +1,6 @@
 package engine
 
 import (
-	"time"
-
 	"github.com/MRamiBalles/CarcelGemelosJuego/server/internal/domain/prisoner"
 	"github.com/MRamiBalles/CarcelGemelosJuego/server/internal/events"
 	"github.com/MRamiBalles/CarcelGemelosJuego/server/internal/platform/logger"
@@ -48,7 +46,7 @@ func (ms *MetabolismSystem) OnTimeTick(event events.GameEvent) {
 		// The payload gives GameHour. We should update on hour change.
 		// But TimeTick is every minute.
 		// Let's rely on simple decay per tick for smoothness or per hour.
-		// Design says "Hardcore Timeline". 
+		// Design says "Hardcore Timeline".
 		// Let's do small decrement every tick (1 min real = 2 min game).
 		// 100 Hunger / (21 days) is too slow.
 		// 100 Hunger / (3 days) = ~33 per day.
@@ -59,7 +57,7 @@ func (ms *MetabolismSystem) OnTimeTick(event events.GameEvent) {
 		// That's ultra fast. 21 days = 21 * 12 mins = 4 hours.
 		// Decay needs to be aggressive.
 	}
-	
+
 	for _, p := range ms.prisoners {
 		// Mystic: Breatharian - No hunger decay, but Stamina decay
 		if p.HasTrait(prisoner.TraitBreatharian) {
@@ -68,7 +66,7 @@ func (ms *MetabolismSystem) OnTimeTick(event events.GameEvent) {
 				p.Stamina = 0
 				// Maybe add "Weakness" state?
 			}
-			continue 
+			continue
 		}
 
 		// Normal: Decay Hunger/Thirst
@@ -113,7 +111,7 @@ func (ms *MetabolismSystem) OnResourceIntake(event events.GameEvent) {
 			p.Sanity -= 50
 			p.HP -= 20
 			ms.logger.Warn("MYSTIC VIOLATION: " + p.Name + " ate solid food!")
-			// Remove trait? 
+			// Remove trait?
 			// p.RemoveTrait(TraitBreatharian) // Need RemoveTrait method
 			return
 		}
@@ -127,6 +125,10 @@ func (ms *MetabolismSystem) OnResourceIntake(event events.GameEvent) {
 	}
 
 	// Cap at 100
-	if p.Thirst > 100 { p.Thirst = 100 }
-	if p.Hunger > 100 { p.Hunger = 100 }
+	if p.Thirst > 100 {
+		p.Thirst = 100
+	}
+	if p.Hunger > 100 {
+		p.Hunger = 100
+	}
 }

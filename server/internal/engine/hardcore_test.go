@@ -12,14 +12,14 @@ import (
 func TestToiletShame(t *testing.T) {
 	// Setup
 	el := events.NewEventLog()
-	log := logger.New()
+	log := logger.NewLogger()
 	ss := NewSanitySystem(el, log)
 
 	// Create Actors
 	user := prisoner.NewPrisoner("P1", "User", prisoner.ArchetypeVeteran)
 	user.CellID = "CELL_101"
-	
-	witness := prisoner.NewPrisoner("P2", "Witness", prisoner.ArchetypeShowman)
+
+	witness := prisoner.NewPrisoner("P2", "Witness", prisoner.ArchetypeDeceiver)
 	witness.CellID = "CELL_101"
 	// Witness is NOT facing wall (default state)
 
@@ -31,7 +31,7 @@ func TestToiletShame(t *testing.T) {
 		ActorID: "P1",
 		CellID:  "CELL_101",
 	}
-	
+
 	event := events.GameEvent{
 		ID:        "TEST_EVT_1",
 		Type:      events.EventTypeToiletUse,
@@ -57,7 +57,7 @@ func TestToiletShame(t *testing.T) {
 func TestLockdownSchedule(t *testing.T) {
 	// Setup
 	el := events.NewEventLog()
-	log := logger.New()
+	log := logger.NewLogger()
 	ls := NewLockdownSystem(el, log)
 
 	// Act: Tick at 22:00
@@ -89,7 +89,7 @@ func TestLockdownSchedule(t *testing.T) {
 func TestMysticDiet(t *testing.T) {
 	// Setup
 	el := events.NewEventLog()
-	log := logger.New()
+	log := logger.NewLogger()
 	ms := NewMetabolismSystem(el, log)
 
 	// Create Mystic
