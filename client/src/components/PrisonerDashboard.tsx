@@ -6,6 +6,8 @@ interface Prisoner {
     archetype: string;
     sanity: number;
     loyalty: number;
+    dignity: number;
+    pot_contribution: number;
     online: boolean;
 }
 
@@ -66,6 +68,20 @@ function PrisonerCard({ prisoner, emoji }: { prisoner: Prisoner; emoji: string }
         prisoner.loyalty < 60 ? "var(--warning-amber)" :
             "var(--loyalty-blue)";
 
+    const dignityColor = prisoner.dignity < 30 ? "var(--twins-red)" :
+        prisoner.dignity < 60 ? "var(--warning-amber)" :
+            "var(--sanity-green)";
+
+    // Determine warnings based on archetype traits
+    let traitWarning = null;
+    if (prisoner.archetype === "VETERAN" && prisoner.sanity < 40) {
+        traitWarning = "⚠️ Aislar para regenerar (Misántropo)";
+    } else if (prisoner.archetype === "DECEIVER" && prisoner.sanity < 30) {
+        traitWarning = "⚠️ Peligro de explosión corta (Short Fuse)";
+    } else if (prisoner.archetype === "TOXIC" && prisoner.sanity < 30) {
+        traitWarning = "⚠️ Relación Tóxica inminente (Bad Romance)";
+    }
+
     return (
         <div className="card" style={{ position: "relative" }}>
             {/* Online Indicator */}
@@ -123,7 +139,57 @@ function PrisonerCard({ prisoner, emoji }: { prisoner: Prisoner; emoji: string }
                 </div>
             </div>
 
-            {/* Loyalty Bar */}
+            {/* Loyalty and Pot Container */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "12px" }}>
+                {/* Loyalty Bar */}
+                <div>
+                    <div style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        marginBottom: "4px",
+                        fontSize: "12px"
+                    }}>
+                        <span style={{ color: "var(--text-muted)" }}>Lealtad</span>
+                        <span style={{ color: loyaltyColor, fontWeight: 600 }}>{prisoner.loyalty}%</span>
+                    </div>
+                    <div className="stat-bar">
+                        <div
+                            className="stat-bar-fill"
+                            style={{
+                                width: `${prisoner.loyalty}%`,
+                                background: loyaltyColor,
+                            }}
+                        ></div>
+                    </div>
+                </div>
+
+                {/* Pot/Money Contribution */}
+                <div>
+                    <div style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        marginBottom: "4px",
+                        fontSize: "12px"
+                    }}>
+                        <span style={{ color: "var(--text-muted)" }}>Bote (Hype)</span>
+                        <span style={{ color: "var(--warning-amber)", fontWeight: 600 }}>${prisoner.pot_contribution.toFixed(2)}</span>
+                    </div>
+                    <div style={{
+                        background: "rgba(245, 158, 11, 0.1)",
+                        height: "8px",
+                        borderRadius: "4px",
+                        border: "1px solid rgba(245, 158, 11, 0.3)",
+                        display: "flex",
+                        alignItems: "center",
+                        padding: "0 4px"
+                    }}>
+                        {/* Static visual representation for money */}
+                        <div style={{ width: "100%", height: "2px", background: "var(--warning-amber)", opacity: 0.5 }}></div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Dignity/Toilet Tracker */}
             <div>
                 <div style={{
                     display: "flex",
@@ -131,36 +197,51 @@ function PrisonerCard({ prisoner, emoji }: { prisoner: Prisoner; emoji: string }
                     marginBottom: "4px",
                     fontSize: "12px"
                 }}>
-                    <span style={{ color: "var(--text-muted)" }}>Lealtad</span>
-                    <span style={{ color: loyaltyColor, fontWeight: 600 }}>{prisoner.loyalty}%</span>
+                    <span style={{ color: "var(--text-muted)" }}>Dignidad</span>
+                    <span style={{ color: dignityColor, fontWeight: 600 }}>{prisoner.dignity}%</span>
                 </div>
                 <div className="stat-bar">
                     <div
                         className="stat-bar-fill"
                         style={{
-                            width: `${prisoner.loyalty}%`,
-                            background: loyaltyColor,
+                            width: `${prisoner.dignity}%`,
+                            background: dignityColor,
                         }}
                     ></div>
                 </div>
             </div>
 
-            {/* Warning */}
-            {prisoner.sanity < 30 && (
-                <div style={{
-                    marginTop: "12px",
-                    padding: "8px",
-                    background: "rgba(220, 38, 38, 0.1)",
-                    borderRadius: "6px",
-                    fontSize: "12px",
-                    color: "var(--twins-red)",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "6px"
-                }}>
-                    ⚠️ Cordura crítica - MAD protegido
-                </div>
-            )}
+            {/* Warnings container */}
+            <div style={{ marginTop: "12px", display: "flex", flexDirection: "column", gap: "6px" }}>
+                {prisoner.sanity < 30 && (
+                    <div style={{
+                        padding: "8px",
+                        background: "rgba(220, 38, 38, 0.1)",
+                        borderRadius: "6px",
+                        fontSize: "12px",
+                        color: "var(--twins-red)",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px"
+                    }}>
+                        ⚠️ Cordura crítica - MAD protegido
+                    </div>
+                )}
+                {traitWarning && (
+                    <div style={{
+                        padding: "8px",
+                        background: "rgba(245, 158, 11, 0.1)",
+                        borderRadius: "6px",
+                        fontSize: "12px",
+                        color: "var(--warning-amber)",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px"
+                    }}>
+                        {traitWarning}
+                    </div>
+                )}
+            </div>
         </div>
     );
 }

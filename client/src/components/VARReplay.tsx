@@ -197,9 +197,11 @@ function EventCard({ event }: { event: typeof mockEvents[0] }) {
                     <div style={{
                         fontSize: "14px",
                         fontWeight: 500,
-                        marginBottom: "4px"
+                        marginBottom: "4px",
+                        color: event.revealed ? "inherit" : "var(--warning-amber)",
+                        fontStyle: event.revealed ? "normal" : "italic"
                     }}>
-                        {event.summary}
+                        {event.revealed ? event.summary : "⚠️ Anomalía Detectada: Procesando información del VAR..."}
                     </div>
                     <div style={{
                         fontSize: "12px",
@@ -207,7 +209,7 @@ function EventCard({ event }: { event: typeof mockEvents[0] }) {
                         display: "flex",
                         gap: "16px"
                     }}>
-                        <span>Actor: {event.actor}</span>
+                        <span>Actor: {event.revealed ? event.actor : "[DATOS_CORRUPTOS]"}</span>
                         <span>Día {event.day}</span>
                     </div>
                 </div>
