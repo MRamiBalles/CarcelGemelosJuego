@@ -39,24 +39,3 @@ func CheckBetrayalSuccess(p *prisoner.Prisoner, rollValue int) bool {
 	threshold := p.Empathy + (100 - p.Sanity)
 	return rollValue > threshold
 }
-
-// ProcessWithdrawal applies the "Cold Turkey" logic for the Redeemed class.
-// Returns buffs/debuffs in the form of (sanityMod, staminaMod).
-func ProcessWithdrawal(p *prisoner.Prisoner) (sanityMod int, staminaMod int) {
-	if p.Archetype != prisoner.ArchetypeRedeemed {
-		return 0, 0
-	}
-
-	// Use the new helper method instead of field access
-	if p.DayInGame <= 5 && p.IsWithdraw() {
-		// Debuff phase
-		return -5, -10
-	}
-
-	if p.DayInGame > 5 && !p.IsWithdraw() { // Survived withdrawal
-		// CLARITY buff
-		return 20, 10
-	}
-
-	return 0, 0
-}
