@@ -18,14 +18,11 @@ The server runs on a rigid, unstoppable clock.
 
 ## 3. Asymmetric Archetypes (The Duos)
 
-### A. The Redemption Duo (Frank & Simon)
-The classic "Tank & Glass Cannon" dynamic.
-*   **Frank (The Protector):**
+### A. The Survivor Duo (Frank Cuesta & TBD)
+Frank's original partner (Simón) was medically disqualified. Frank now pairs with a wildcard.
+*   **Frank (The Veteran):**
     *   **Passive:** "Iron Stomach". Immune to food poisoning and "Dirty Environment" debuffs.
-    *   **Mission:** Guard Simon. Gains XP only if Simon survives the day.
-*   **Simon (The Evolution):**
-    *   **Debuff (Days 1-5):** "Withdrawal". Screen shake, hallucinations, miniscule stamina.
-    *   **Evolution:** If he survives Day 5 without using the "Give Up" button, he transforms into the **"Mastermind"** class (Highest INT/Crafting stats in the game).
+    *   **Passive:** "Misanthrope". Regenerates Sanity only when isolated from others.
 
 ### B. The Toxic Duo (Labrador & Ylenia)
 A high-risk, high-reward "Negative Synergy" pair.
@@ -40,9 +37,17 @@ A high-risk, high-reward "Negative Synergy" pair.
     *   **Restriction:** Food bar is **LOCKED**. Cannot eat solid food.
     *   **Power:** As long as he only drinks water, he retains "Ascended" status (control over NPC followers). One bite of rice ruins his build.
 
-### D. The Chaos Agent (Aída) - Solo/Wildcard
-*   **Passive:** "Insomniac". Needs 50% less sleep than other humans.
-*   **Active:** "Poltergeist". Can generate noise/bang bars during **Lockdown** (when others are trapped) to prevent neighbors from regenerating Stamina.
+### D. The Chaos Agents (Aída, Dakota, Héctor)
+*   **Aída Nízar:**
+    *   **Passive:** "Insomniac". Needs 50% less sleep than other humans.
+    *   **Active:** "Poltergeist". Can generate noise/bang bars during **Lockdown** (when others are trapped) to prevent neighbors from regenerating Stamina.
+*   **Dakota Tárraga:**
+    *   **Passive:** "Short Fuse". Sanity drops 2x faster when insulted, but physical damage dealt (if allowed by combat rules) is doubled when Sanity is below 30%.
+*   **Héctor "El Morritos":**
+    *   **Mechanic:** "Charm/Deception". Can steal small amounts of rice/water without triggering the `Vars` betrayal log immediately (delay of 12 hours).
+
+### E. The Bench (Falete, La Marrash)
+Reserved mechanics for late arrivals or replacements.
 
 ## 4. Systems of Torture & Economy
 

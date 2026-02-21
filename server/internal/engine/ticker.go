@@ -19,7 +19,7 @@ const TickRate = 1 * time.Minute // 1 real minute = ~2 in-game hours
 // TimeTickPayload is the data attached to each TimeTickEvent.
 type TimeTickPayload struct {
 	GameDay      int   `json:"game_day"`
-	GameHour     int   `json:"game_hour"`      // 0-23 in-game
+	GameHour     int   `json:"game_hour"` // 0-23 in-game
 	TickNumber   int64 `json:"tick_number"`
 	IsNightTime  bool  `json:"is_night_time"`  // 22:00-06:00
 	IsMealWindow bool  `json:"is_meal_window"` // 08:00, 14:00, 20:00
@@ -98,7 +98,7 @@ func (t *Ticker) tick() {
 	}
 
 	t.eventLog.Append(event)
-	t.logger.Event("TIME_TICK", "TWINS", 
+	t.logger.Event("TIME_TICK", "TWINS",
 		"Day "+string(rune('0'+t.gameDay))+" Hour "+string(rune('0'+t.gameHour/10))+string(rune('0'+t.gameHour%10)))
 }
 
@@ -112,7 +112,23 @@ func (t *Ticker) advanceTime() {
 
 		if t.gameDay > 21 {
 			t.logger.Warn("DAY 21 REACHED. Endgame triggered.")
-			// TODO: Trigger Duo Dilemma resolution
+
+			// Trigger Duo Dilemma resolution
+			dilemmaEvent := events.GameEvent{
+				ID:        events.GenerateEventID(),
+				Timestamp: time.Now(),
+				Type:      events.EventTypeFinalDilemmaStart,
+				ActorID:   "SYSTEM_TWINS",
+				Payload: map[string]interface{}{
+					"message": "The 21 days are over. The Final Dilemma begins.",
+				},
+				GameDay: 21,
+			}
+			t.eventLog.Append(dilemmaEvent)
+			t.logger.Event("FINAL_DILEMMA_START", "TWINS", "Judgment Day")
+
+			// Stop the ticker as the main game loop ends here
+			t.Stop()
 		}
 	}
 }

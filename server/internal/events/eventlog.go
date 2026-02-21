@@ -11,19 +11,25 @@ import (
 type EventType string
 
 const (
-	EventTypeResourceIntake EventType = "RESOURCE_INTAKE"
-	EventTypeNoiseEvent     EventType = "NOISE_EVENT"
-	EventTypeSocialAction   EventType = "SOCIAL_ACTION"
-	EventTypeVote           EventType = "VOTE"
-	EventTypeBetrayal       EventType = "BETRAYAL"
-	EventTypePrivacyBreach  EventType = "PRIVACY_BREACH"
-	EventTypeTimeTick       EventType = "TIME_TICK"
-	EventTypeSanityChange   EventType = "SANITY_CHANGE"
-	EventTypeLoyaltyChange  EventType = "LOYALTY_CHANGE"
-	EventTypeToiletUse      EventType = "TOILET_USE"
-	EventTypeDoorLock       EventType = "DOOR_LOCK"
-	EventTypeDoorOpen       EventType = "DOOR_OPEN"
-	EventTypeAudioTorture   EventType = "AUDIO_TORTURE"
+	EventTypeResourceIntake       EventType = "RESOURCE_INTAKE"
+	EventTypeNoiseEvent           EventType = "NOISE_EVENT"
+	EventTypeSocialAction         EventType = "SOCIAL_ACTION"
+	EventTypeVote                 EventType = "VOTE"
+	EventTypeBetrayal             EventType = "BETRAYAL"
+	EventTypePrivacyBreach        EventType = "PRIVACY_BREACH"
+	EventTypeTimeTick             EventType = "TIME_TICK"
+	EventTypeSanityChange         EventType = "SANITY_CHANGE"
+	EventTypeLoyaltyChange        EventType = "LOYALTY_CHANGE"
+	EventTypeToiletUse            EventType = "TOILET_USE"
+	EventTypeDoorLock             EventType = "DOOR_LOCK"
+	EventTypeDoorOpen             EventType = "DOOR_OPEN"
+	EventTypeAudioTorture         EventType = "AUDIO_TORTURE"
+	EventTypeAggressiveEmote      EventType = "AGGRESSIVE_EMOTE"
+	EventTypeLockdownBang         EventType = "LOCKDOWN_BANG"
+	EventTypeInsult               EventType = "INSULT"
+	EventTypeSteal                EventType = "STEAL"
+	EventTypeFinalDilemmaStart    EventType = "FINAL_DILEMMA_START"
+	EventTypeFinalDilemmaDecision EventType = "FINAL_DILEMMA_DECISION"
 )
 
 // GameEvent represents an immutable record of an action in the game.
@@ -31,9 +37,9 @@ type GameEvent struct {
 	ID         string      `json:"id"`
 	Timestamp  time.Time   `json:"timestamp"`
 	Type       EventType   `json:"type"`
-	ActorID    string      `json:"actor_id"`    // Who performed the action
-	TargetID   string      `json:"target_id"`   // Who was affected (optional)
-	Payload    interface{} `json:"payload"`     // Event-specific data
+	ActorID    string      `json:"actor_id"`  // Who performed the action
+	TargetID   string      `json:"target_id"` // Who was affected (optional)
+	Payload    interface{} `json:"payload"`   // Event-specific data
 	GameDay    int         `json:"game_day"`
 	IsRevealed bool        `json:"is_revealed"` // Exposed to audience?
 }

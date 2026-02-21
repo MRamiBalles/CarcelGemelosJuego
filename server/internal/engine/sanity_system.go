@@ -20,7 +20,7 @@ type SanityChangePayload struct {
 	PreviousSan  int    `json:"previous_sanity"`
 	NewSanity    int    `json:"new_sanity"`
 	Delta        int    `json:"delta"`
-	Cause        string `json:"cause"`        // "NOISE", "PRIVACY", "SOCIAL"
+	Cause        string `json:"cause"`          // "NOISE", "PRIVACY", "SOCIAL"
 	CauseEventID string `json:"cause_event_id"` // Links to the triggering event
 }
 
@@ -97,7 +97,7 @@ func (ss *SanitySystem) OnNoiseEvent(noiseEvent events.GameEvent) {
 		}
 
 		ss.eventLog.Append(changeEvent)
-		ss.logger.Event("SANITY_DRAIN", p.ID, 
+		ss.logger.Event("SANITY_DRAIN", p.ID,
 			"Drain:"+string(rune('0'+drain/10))+string(rune('0'+drain%10))+" | New:"+string(rune('0'+p.Sanity/10))+string(rune('0'+p.Sanity%10)))
 	}
 }
@@ -142,22 +142,22 @@ func (ss *SanitySystem) OnToiletUseEvent(event events.GameEvent) {
 		if neighbor.CellID == user.CellID && neighbor.ID != user.ID {
 			// Check facing
 			isFacingWall := neighbor.HasState(prisoner.StateFacingWall)
-			
+
 			if !isFacingWall {
 				// PRIVACY BREACH!
-				
+
 				// Damage Witness
 				drainWitness := 20
 				// Mystic mitigation
 				if neighbor.Archetype == prisoner.ArchetypeMystic && neighbor.Sanity > 20 {
 					drainWitness /= 2
 				}
-				
+
 				neighbor.Sanity -= drainWitness
 				if neighbor.Sanity < 0 {
 					neighbor.Sanity = 0
 				}
-				
+
 				ss.emitSanityChange(neighbor.ID, -drainWitness, "PRIVACY_WITNESS", event.ID)
 
 				// Damage User (Shame)
@@ -201,28 +201,61 @@ func (ss *SanitySystem) emitSanityChange(targetID string, delta int, cause strin
 	ss.eventLog.Append(event)
 }
 
-// ProcessWithdrawal handles Simon's 5-day "Cold Turkey" mechanic.
-func (ss *SanitySystem) ProcessWithdrawal(gameDay int) {
+// OnTimeTick handles periodic sanity regeneration for specific traits.
+func (ss *SanitySystem) OnTimeTick(event events.GameEvent) {
 	for _, p := range ss.prisoners {
-		if p.Archetype != prisoner.ArchetypeRedeemed {
-			continue
-		}
-
-		p.DayInGame = gameDay
-		sanityMod, _ := rules.ProcessWithdrawal(p)
-
-		if sanityMod != 0 {
-			previousSanity := p.Sanity
-			p.Sanity += sanityMod
-			if p.Sanity > 100 {
-				p.Sanity = 100
-			}
-			if p.Sanity < 0 {
-				p.Sanity = 0
+		// Veteran (Frank): Misanthrope trait (Sanity regen when alone)
+		if p.HasTrait(prisoner.TraitMisanthrope) {
+			isAlone := true
+			for _, neighbor := range ss.prisoners {
+				if neighbor.CellID == p.CellID && neighbor.ID != p.ID && !neighbor.IsSleeper {
+					isAlone = false
+					break
+				}
 			}
 
-			// Emit event for withdrawal effect
-			ss.emitSanityChange(p.ID, sanityMod, "WITHDRAWAL", "SYSTEM_TICK")
+			if isAlone && p.Sanity < 100 {
+				p.Sanity += 2
+				if p.Sanity > 100 {
+					p.Sanity = 100
+				}
+				ss.emitSanityChange(p.ID, 2, "MISANTHROPE_REGEN", event.ID)
+			}
 		}
 	}
+}
+
+// InsultPayload carries data about a verbal attack.
+type InsultPayload struct {
+	ActorID  string `json:"actor_id"`
+	TargetID string `json:"target_id"`
+	Severity int    `json:"severity"` // Base sanity damage
+}
+
+// OnInsultEvent handles verbal attacks and the Short Fuse trait.
+func (ss *SanitySystem) OnInsultEvent(event events.GameEvent) {
+	payload, ok := event.Payload.(InsultPayload)
+	if !ok {
+		return
+	}
+
+	target, exists := ss.prisoners[payload.TargetID]
+	if !exists {
+		return
+	}
+
+	damage := payload.Severity
+
+	// Explosive (Dakota): Short Fuse trait (2x sanity damage when insulted)
+	if target.HasTrait(prisoner.TraitShortFuse) {
+		damage *= 2
+		ss.logger.Event("SHORT_FUSE_TRIGGERED", target.ID, "Double sanity damage taken")
+	}
+
+	target.Sanity -= damage
+	if target.Sanity < 0 {
+		target.Sanity = 0
+	}
+
+	ss.emitSanityChange(target.ID, -damage, "INSULTED", event.ID)
 }

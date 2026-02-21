@@ -6,22 +6,25 @@ package prisoner
 type Archetype string
 
 const (
-	ArchetypeVeteran  Archetype = "Veteran"  // Frank - Sanctuary Funding
-	ArchetypeMystic   Archetype = "Mystic"   // Tartaria - Reality Distortion
-	ArchetypeShowman  Archetype = "Showman"  // Marrash - Content/Attention
-	ArchetypeRedeemed Archetype = "Redeemed" // Simón - Survival/Expiation
-	ArchetypeChaos    Archetype = "Chaos"    // Aída - Energy/Noise
+	ArchetypeVeteran   Archetype = "Veteran"   // Frank Cuesta
+	ArchetypeMystic    Archetype = "Mystic"    // Tartaria
+	ArchetypeChaos     Archetype = "Chaos"     // Aída
+	ArchetypeToxic     Archetype = "Toxic"     // Labrador & Ylenia
+	ArchetypeExplosive Archetype = "Explosive" // Dakota
+	ArchetypeDeceiver  Archetype = "Deceiver"  // Héctor
 )
 
 // TraitID identifies a specific passive or active ability.
 type TraitID string
 
 const (
-	TraitIronStomach   TraitID = "IronStomach"   // Immune to filth/food poisoning
-	TraitMisanthrope   TraitID = "Misanthrope"   // Sanity regen when alone
-	TraitBreatharian   TraitID = "Breatharian"   // Cannot eat solids, hunger frozen
-	TraitContentCreator TraitID = "ContentCreator" // Bonus interaction with cameras
-	TraitInsomniac     TraitID = "Insomniac"     // Needs less sleep
+	TraitIronStomach    TraitID = "IronStomach"    // Frank: Immune to filth
+	TraitMisanthrope    TraitID = "Misanthrope"    // Frank: Sanity regen when alone
+	TraitBreatharian    TraitID = "Breatharian"    // Mystic: Cannot eat solids
+	TraitInsomniac      TraitID = "Insomniac"      // Chaos: Needs less sleep
+	TraitBadRomance     TraitID = "BadRomance"     // Toxic: Hype from conflict, Sanity drain
+	TraitShortFuse      TraitID = "ShortFuse"      // Explosive: 2x insult dmg, 2x phys dmg at <30 sanity
+	TraitSmoothCriminal TraitID = "SmoothCriminal" // Deceiver: Steal events delayed 12h
 )
 
 // StateID identifies a temporary status effect.
@@ -89,10 +92,14 @@ func NewPrisoner(id, name string, archetype Archetype) *Prisoner {
 		p.Traits = append(p.Traits, TraitIronStomach, TraitMisanthrope)
 	case ArchetypeMystic:
 		p.Traits = append(p.Traits, TraitBreatharian)
-	case ArchetypeRedeemed:
-		p.AddState(StateWithdrawal, 5*24*60) // 5 Days in minutes (assuming 1 tick = 1 min)
 	case ArchetypeChaos:
 		p.Traits = append(p.Traits, TraitInsomniac)
+	case ArchetypeToxic:
+		p.Traits = append(p.Traits, TraitBadRomance)
+	case ArchetypeExplosive:
+		p.Traits = append(p.Traits, TraitShortFuse)
+	case ArchetypeDeceiver:
+		p.Traits = append(p.Traits, TraitSmoothCriminal)
 	}
 
 	return p
