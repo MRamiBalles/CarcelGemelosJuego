@@ -1,10 +1,10 @@
-# Technical Plan: "Cárcel de los Gemelos" (V1.0)
+# Technical Plan: "Cárcel de los Gemelos" (V2.1 - Hardcore Pivot)
 
 This plan defines the "How," focusing on mitigating **Architectural Technical Debt (ATD)**.
 
 ## 1. System Architecture: Authoritative Hybrid
 
-To support the 1-week persistent reality show, we use a decentralized-authoritative model.
+To support the 21-day persistent reality show, we use a decentralized-authoritative model.
 
 *   **Logic Master:** Authoritative Game Server written in **Go**.
 *   **Architecture Pattern:** **Clean Architecture** (Separation of Concerns).
@@ -31,6 +31,7 @@ The server is divided into independent micro-services/modules to stay under the 
 | Layer | Technology | Frequency |
 | :--- | :--- | :--- |
 | **PC Client (Unreal/Unity)** | WebSockets / TCP | High (Real-time movement/voice) |
+| **Frontend Monitor (Next.js)** | WebSockets / SSE | Medium (Events, VAR Replay, Vitals) |
 | **Mobile App (Audience)** | HTTP / SSE | Low (Voting / Event updates) |
 | **Recap Engine** | Event Store | On-Login (Build state since last session) |
 

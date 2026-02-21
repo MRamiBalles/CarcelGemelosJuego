@@ -54,10 +54,10 @@ This document breaks down the implementation into atomic, testable units to avoi
 - [x] **T031:** Concurrency optimization (channel buffers, DB indexes).
 
 ## Phase 10: V2.1 Hardcore Mechanics (Audit & New Cast Adaptation)
-- [ ] **T032:** Implement the Day 21 "Final Dilemma" resolution logic in Ticker and Engine.
-- [ ] **T033:** Implement Toxic Duo ("Bad Romance") proximity Sanity drain and conflict-to-Hype logic.
-- [ ] **T034:** Implement Chaos Agent ("Poltergeist") active lockdown noise mechanic (Aída).
-- [ ] **T035:** Implement Veteran ("Misanthrope") solo Sanity regen logic (Frank).
-- [ ] **T036:** Implement "Short Fuse" passive logic for Dakota (2x sanity drain on insult, double damage).
-- [ ] **T037:** Implement "Charm/Deception" mechanic for Héctor (Delay in VAR logs when stealing).
-- [ ] **T038:** Implement Loyalty Bar active benefits (Sanity regen buffs on high loyalty).
+- [x] **T032:** Implement the Day 21 "Final Dilemma" resolution logic in Ticker and Engine.
+- [x] **T033:** Implement Toxic Duo ("Bad Romance") proximity Sanity drain and conflict-to-Hype logic.
+- [x] **T034:** Implement Chaos Agent ("Poltergeist") active lockdown noise mechanic (Aída).
+- [x] **T035:** Implement Veteran ("Misanthrope") solo Sanity regen logic (Frank).
+- [x] **T036:** Implement "Short Fuse" passive logic for Dakota (2x sanity drain on insult, double damage).
+- [x] **T037:** Implement "Charm/Deception" mechanic for Héctor (Delay in VAR logs when stealing).
+- [x] **T038:** Implement Loyalty Bar active benefits (Sanity regen buffs on high loyalty).
