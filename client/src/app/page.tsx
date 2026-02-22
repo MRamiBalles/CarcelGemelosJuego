@@ -5,6 +5,7 @@ import PrisonerDashboard from "@/components/PrisonerDashboard";
 import TwinsControlPanel from "@/components/TwinsControlPanel";
 import VARReplay from "@/components/VARReplay";
 import Header from "@/components/Header";
+import { useGameEngine } from "@/hooks/useGameEngine";
 
 // Mock data for demonstration (would come from WebSocket in production)
 const mockPrisoners = [
@@ -28,6 +29,9 @@ export default function Home() {
     const [shadowMode, setShadowMode] = useState(true);
     const [gameDay, setGameDay] = useState(7);
     const [tensionLevel, setTensionLevel] = useState("HIGH");
+
+    // Live WebSocket connection to Go Engine
+    const { events, isConnected, triggerOracle, triggerTorture } = useGameEngine();
 
     return (
         <main className="min-h-screen" style={{ background: "var(--bg-void)" }}>
@@ -66,8 +70,14 @@ export default function Home() {
                 </div>
             </nav>
 
-            {/* Content */}
+            {/* Content  - Powered by WebSocket Events */}
             <div className="container" style={{ padding: "24px" }}>
+                {!isConnected && (
+                    <div style={{ color: "var(--warning-amber)", marginBottom: "16px", padding: "12px", background: "rgba(255,193,7,0.1)", border: "1px solid var(--warning-amber)", borderRadius: "6px" }}>
+                        ⚠️ Conexión con el Servidor (VAR) interrumpida. Mostrando datos mockeados o no disponibles.
+                    </div>
+                )}
+
                 {activeTab === "dashboard" && (
                     <PrisonerDashboard prisoners={mockPrisoners} />
                 )}
@@ -76,10 +86,13 @@ export default function Home() {
                         decisions={mockTwinsDecisions}
                         shadowMode={shadowMode}
                         onToggleShadowMode={() => setShadowMode(!shadowMode)}
+                        // Adding trigger callbacks mapped to the API
+                        onTriggerOracle={(target, message) => triggerOracle(target, message)}
+                        onTriggerTorture={(soundId) => triggerTorture(soundId)}
                     />
                 )}
                 {activeTab === "var" && (
-                    <VARReplay />
+                    <VARReplay liveEvents={events} />
                 )}
             </div>
         </main>
