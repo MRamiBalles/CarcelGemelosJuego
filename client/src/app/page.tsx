@@ -9,12 +9,12 @@ import { useGameEngine } from "@/hooks/useGameEngine";
 
 // Mock data for demonstration (would come from WebSocket in production)
 const mockPrisoners = [
-    { id: "P001", name: "Simón", archetype: "VETERAN", sanity: 72, loyalty: 45, online: true },
-    { id: "P002", name: "Elena", archetype: "MYSTIC", sanity: 85, loyalty: 60, online: true },
-    { id: "P003", name: "Marco", archetype: "SHOWMAN", sanity: 55, loyalty: 30, online: false },
-    { id: "P004", name: "Lucía", archetype: "REDEEMED", sanity: 90, loyalty: 75, online: true },
-    { id: "P005", name: "Diego", archetype: "VETERAN", sanity: 40, loyalty: 20, online: true },
-    { id: "P006", name: "Carla", archetype: "SHOWMAN", sanity: 65, loyalty: 55, online: false },
+    { id: "P001", name: "Simón", archetype: "VETERAN", sanity: 72, loyalty: 45, online: true, dignity: 100, pot_contribution: 0 },
+    { id: "P002", name: "Elena", archetype: "MYSTIC", sanity: 85, loyalty: 60, online: true, dignity: 100, pot_contribution: 0 },
+    { id: "P003", name: "Marco", archetype: "SHOWMAN", sanity: 55, loyalty: 30, online: false, dignity: 100, pot_contribution: 0 },
+    { id: "P004", name: "Lucía", archetype: "REDEEMED", sanity: 90, loyalty: 75, online: true, dignity: 100, pot_contribution: 0 },
+    { id: "P005", name: "Diego", archetype: "VETERAN", sanity: 40, loyalty: 20, online: true, dignity: 100, pot_contribution: 0 },
+    { id: "P006", name: "Carla", archetype: "SHOWMAN", sanity: 65, loyalty: 55, online: false, dignity: 100, pot_contribution: 0 },
 ];
 
 const mockTwinsDecisions = [
