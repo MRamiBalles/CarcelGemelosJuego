@@ -29,6 +29,11 @@ func CalculateSanityDrain(p *prisoner.Prisoner, params SanityDrainParams) int {
 	// Veteran bonus when alone (negative drain = regen)
 	// This would be triggered from the engine with context, not here directly.
 
+	// ShortFuse double damage
+	if p.HasTrait(prisoner.TraitShortFuse) {
+		baseDrain *= 2
+	}
+
 	return baseDrain
 }
 

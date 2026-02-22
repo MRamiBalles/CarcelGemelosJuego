@@ -121,3 +121,58 @@ func TestMysticDiet(t *testing.T) {
 		t.Errorf("Mystic should lose HP for eating solids")
 	}
 }
+
+func TestShortFuse(t *testing.T) {
+	// Setup
+	el := events.NewEventLog()
+	log := logger.NewLogger()
+	ss := NewSanitySystem(el, log)
+
+	// Create Actors
+	toxic := prisoner.NewPrisoner("TOX_1", "Dakota", prisoner.ArchetypeExplosive)
+	normal := prisoner.NewPrisoner("NRM_1", "Marco", prisoner.ArchetypeVeteran)
+
+	// Verify trait integration
+	if !toxic.HasTrait(prisoner.TraitShortFuse) {
+		t.Fatalf("Toxic archetype should have ShortFuse trait")
+	}
+
+	ss.RegisterPrisoner(toxic)
+	ss.RegisterPrisoner(normal)
+
+	// Act: Trigger an Insult (Baseline damage modeled as NoiseEventPayload)
+	// Intensity 2 * BaseMultiplier(5) = 10 base damage
+	payload1 := NoiseEventPayload{
+		NoiseType:   NoiseSiren,
+		TargetZone:  "TOX_1",
+		Intensity:   2,
+		DurationSec: 60,
+		Reason:      "VERBAL_ABUSE",
+	}
+	payload2 := NoiseEventPayload{
+		NoiseType:   NoiseSiren,
+		TargetZone:  "NRM_1",
+		Intensity:   2,
+		DurationSec: 60,
+		Reason:      "VERBAL_ABUSE",
+	}
+
+	evt1 := events.GameEvent{Type: events.EventTypeNoiseEvent, Payload: payload1}
+	evt2 := events.GameEvent{Type: events.EventTypeNoiseEvent, Payload: payload2}
+
+	ss.OnNoiseEvent(evt1)
+	ss.OnNoiseEvent(evt2)
+
+	// Assert: Toxic takes double damage (20 vs 10)
+	// Base Sanity is 100.
+	expectedToxicSanity := 100 - (10 * 2)
+	expectedNormalSanity := 100 - 10
+
+	if toxic.Sanity != expectedToxicSanity {
+		t.Errorf("Toxic Sanity mismatch: Expected %v, got %v", expectedToxicSanity, toxic.Sanity)
+	}
+
+	if normal.Sanity != expectedNormalSanity {
+		t.Errorf("Normal Sanity mismatch: Expected %v, got %v", expectedNormalSanity, normal.Sanity)
+	}
+}
