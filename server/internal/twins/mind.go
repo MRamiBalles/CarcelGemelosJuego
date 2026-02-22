@@ -30,12 +30,13 @@ type TwinsMind struct {
 // NewTwinsMind creates the AI orchestrator.
 func NewTwinsMind(
 	eventLog *events.EventLog,
+	stateProvider perception.StateProvider,
 	noiseManager *engine.NoiseManager,
 	wsHub *network.Hub,
 	log *logger.Logger,
 ) *TwinsMind {
 	return &TwinsMind{
-		perceiver: perception.NewPerceiver(eventLog, log),
+		perceiver: perception.NewPerceiver(eventLog, stateProvider, log),
 		cognitor:  cognition.NewCognitor(log),
 		executor:  action.NewExecutor(noiseManager, eventLog, wsHub, log),
 		logger:    log,

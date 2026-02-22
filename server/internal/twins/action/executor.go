@@ -59,6 +59,10 @@ func (e *Executor) Execute(ctx context.Context, decision *cognition.Decision) er
 	switch decision.ActionType {
 	case cognition.ActionNoise:
 		return e.executeNoise(decision)
+	case cognition.ActionAudioTorture:
+		return e.executeAudioTorture(decision)
+	case cognition.ActionLockdown:
+		return e.executeLockdown(decision)
 	case cognition.ActionResourceCut:
 		return e.executeResourceCut(decision)
 	case cognition.ActionRevealSecret:
@@ -101,17 +105,6 @@ func (e *Executor) executeNoise(decision *cognition.Decision) error {
 	reason := "TWINS_AUTONOMOUS:" + decision.Justification
 	e.noiseManager.TriggerPunishment(decision.Target, reason)
 
-	// Broadcast to connected players
-	e.wsHub.BroadcastToGame("", network.Message{
-		Type:      network.MsgTypeEvent,
-		Timestamp: time.Now().Unix(),
-		Payload: map[string]interface{}{
-			"event_type": "TWINS_NOISE",
-			"message":    "Los Gemelos han activado una tortura de ruido...",
-			"intensity":  decision.Intensity,
-		},
-	})
-
 	e.logger.Info("ACTION: Noise torture executed at intensity " + string(rune('0'+decision.Intensity)))
 	return nil
 }
@@ -125,25 +118,14 @@ func (e *Executor) executeResourceCut(decision *cognition.Decision) error {
 		ActorID:   "SYSTEM_TWINS",
 		TargetID:  decision.Target,
 		Payload: map[string]interface{}{
-			"resource_type": "WATER", // Could be WATER, FOOD, LIGHT
+			"resource_type":  "WATER", // Could be WATER, FOOD, LIGHT
 			"duration_hours": decision.Intensity * 2,
-			"justification": decision.Justification,
+			"justification":  decision.Justification,
 		},
 		GameDay: e.currentDay,
 	}
 
 	e.eventLog.Append(event)
-
-	// Broadcast warning
-	e.wsHub.BroadcastToGame("", network.Message{
-		Type:      network.MsgTypeEvent,
-		Timestamp: time.Now().Unix(),
-		Payload: map[string]interface{}{
-			"event_type": "TWINS_RESOURCE_CUT",
-			"message":    "Los Gemelos han cortado el suministro de agua...",
-			"target":     decision.Target,
-		},
-	})
 
 	e.logger.Info("ACTION: Resource cut executed on " + decision.Target)
 	return nil
@@ -153,7 +135,7 @@ func (e *Executor) executeResourceCut(decision *cognition.Decision) error {
 func (e *Executor) executeReveal(decision *cognition.Decision) error {
 	// Find unrevealed events and mark one as revealed
 	allEvents := e.eventLog.Replay()
-	
+
 	for _, evt := range allEvents {
 		if !evt.IsRevealed && evt.Type == events.EventTypeBetrayal {
 			// Mark as revealed (in production, this would update DB)
@@ -173,17 +155,6 @@ func (e *Executor) executeReveal(decision *cognition.Decision) error {
 			}
 
 			e.eventLog.Append(event)
-
-			// Broadcast revelation
-			e.wsHub.BroadcastToGame("", network.Message{
-				Type:      network.MsgTypeEvent,
-				Timestamp: time.Now().Unix(),
-				Payload: map[string]interface{}{
-					"event_type": "TWINS_REVELATION",
-					"message":    "Los Gemelos han revelado un secreto...",
-					"target":     evt.ActorID,
-				},
-			})
 
 			e.logger.Info("ACTION: Secret revealed about " + evt.ActorID)
 			return nil
@@ -213,16 +184,45 @@ func (e *Executor) executeReward(decision *cognition.Decision) error {
 
 	e.eventLog.Append(event)
 
-	e.wsHub.BroadcastToGame("", network.Message{
-		Type:      network.MsgTypeEvent,
-		Timestamp: time.Now().Unix(),
-		Payload: map[string]interface{}{
-			"event_type": "TWINS_REWARD",
-			"message":    "Los Gemelos han premiado a un prisionero...",
-			"target":     decision.Target,
-		},
-	})
-
 	e.logger.Info("ACTION: Reward granted to " + decision.Target)
+	return nil
+}
+
+// executeAudioTorture triggers an inescapable audio event.
+func (e *Executor) executeAudioTorture(decision *cognition.Decision) error {
+	payload := events.AudioTorturePayload{
+		SoundName: "SIREN_MAX",
+		Duration:  30 * decision.Intensity,
+	}
+
+	event := events.GameEvent{
+		ID:        events.GenerateEventID(),
+		Timestamp: time.Now(),
+		Type:      events.EventTypeAudioTorture,
+		ActorID:   "SYSTEM_TWINS",
+		TargetID:  decision.Target,
+		Payload:   payload,
+		GameDay:   e.currentDay,
+	}
+
+	e.eventLog.Append(event)
+	e.logger.Info("ACTION: Audio Torture executed on " + decision.Target)
+	return nil
+}
+
+// executeLockdown overrides the daily lockdown schedule.
+func (e *Executor) executeLockdown(decision *cognition.Decision) error {
+	event := events.GameEvent{
+		ID:        events.GenerateEventID(),
+		Timestamp: time.Now(),
+		Type:      events.EventTypeDoorLock,
+		ActorID:   "SYSTEM_TWINS",
+		TargetID:  "ALL",
+		Payload:   map[string]interface{}{"reason": decision.Justification},
+		GameDay:   e.currentDay,
+	}
+
+	e.eventLog.Append(event)
+	e.logger.Info("ACTION: Global Lockdown triggered.")
 	return nil
 }

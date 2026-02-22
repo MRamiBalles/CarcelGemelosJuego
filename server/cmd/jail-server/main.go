@@ -16,6 +16,7 @@ import (
 	"github.com/MRamiBalles/CarcelGemelosJuego/server/internal/events"
 	"github.com/MRamiBalles/CarcelGemelosJuego/server/internal/network"
 	"github.com/MRamiBalles/CarcelGemelosJuego/server/internal/platform/logger"
+	"github.com/MRamiBalles/CarcelGemelosJuego/server/internal/twins"
 	"github.com/gorilla/websocket"
 )
 
@@ -38,6 +39,11 @@ func main() {
 	hub := network.NewHub(appLogger)
 	go hub.Run(ctx)
 	hub.StartEventPoller(ctx, eventLog)
+
+	appLogger.Info("Bootstrapping AI Cognition (Los Gemelos)...")
+	aiMind := twins.NewTwinsMind(eventLog, gameEngine, gameEngine.GetNoiseManager(), hub, appLogger)
+	aiMind.SetGameID("GAME_1")
+	go aiMind.Start(ctx)
 
 	// Setup API Routes
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
@@ -98,6 +104,25 @@ func main() {
 
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(map[string]string{"status": "ok", "message": "Audio Torture dispatched"})
+	})
+
+	http.HandleFunc("/api/twins/force-decision", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+
+		decision, err := aiMind.ForceDecision(ctx, 1) // default to day 1 for testing
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"status":   "ok",
+			"decision": decision,
+		})
 	})
 
 	go func() {

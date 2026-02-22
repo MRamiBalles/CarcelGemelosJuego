@@ -76,6 +76,11 @@ func (e *Engine) GetPrisoners() map[string]*prisoner.Prisoner {
 	return e.prisoners
 }
 
+// GetNoiseManager exposes the built-in NoiseManager for the Twins AI Executor.
+func (e *Engine) GetNoiseManager() *NoiseManager {
+	return e.noiseManager
+}
+
 // processEvents listens to the EventLog and dispatches items to subsystems.
 func (e *Engine) processEvents(ctx context.Context) {
 	pollInterval := time.NewTicker(100 * time.Millisecond) // Poll the event log for new events

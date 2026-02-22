@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/MRamiBalles/CarcelGemelosJuego/server/internal/domain/prisoner"
 	"github.com/MRamiBalles/CarcelGemelosJuego/server/internal/events"
 	"github.com/MRamiBalles/CarcelGemelosJuego/server/internal/platform/logger"
 )
@@ -30,16 +31,23 @@ type PrisonState struct {
 	NarrativeSummary  string            `json:"narrative_summary"` // LLM-ready context
 }
 
+// StateProvider allows the Perceiver to query current prisoner states
+type StateProvider interface {
+	GetPrisoners() map[string]*prisoner.Prisoner
+}
+
 // Perceiver reads the EventLog and builds context for the Cognition module.
 type Perceiver struct {
 	eventLog *events.EventLog
+	state    StateProvider
 	logger   *logger.Logger
 }
 
 // NewPerceiver creates a new perception module.
-func NewPerceiver(el *events.EventLog, log *logger.Logger) *Perceiver {
+func NewPerceiver(el *events.EventLog, sp StateProvider, log *logger.Logger) *Perceiver {
 	return &Perceiver{
 		eventLog: el,
+		state:    sp,
 		logger:   log,
 	}
 }
@@ -90,8 +98,31 @@ func (p *Perceiver) BuildPrisonState(ctx context.Context, gameID string, current
 	// Determine tension level
 	state.TensionLevel = p.calculateTensionLevel(state)
 
+	// Build base profiles from current state
+	prisoners := p.state.GetPrisoners()
+	state.TotalPrisoners = len(prisoners)
+
+	for id, pr := range prisoners {
+		var traits []string
+		for _, t := range pr.Traits {
+			traits = append(traits, string(t))
+		}
+
+		traitsStr := "None"
+		if len(traits) > 0 {
+			traitsStr = strings.Join(traits, ", ")
+		}
+
+		baseProfile := fmt.Sprintf("Arch:%s | Traits:[%s] | Sanity:%d | Dignity:%d | Pot:%.1f",
+			pr.Archetype, traitsStr, pr.Sanity, pr.Dignity, pr.PotContribution)
+
+		// Append event history to base profile
+		eventHistory := p.GetPrisonerProfile(id, recentEvents)
+		state.PrisonerSummaries[id] = baseProfile + " || " + eventHistory
+	}
+
 	// Build narrative summary for LLM context
-	state.NarrativeSummary = p.buildNarrativeSummary(state, recentEvents)
+	state.NarrativeSummary = p.buildNarrativeSummary(state, recentEvents, prisoners)
 
 	p.logger.Event("PERCEPTION", "TWINS", "State built: Tension="+state.TensionLevel)
 
@@ -154,7 +185,7 @@ func (p *Perceiver) calculateTensionLevel(state *PrisonState) string {
 }
 
 // buildNarrativeSummary creates an LLM-ready context string.
-func (p *Perceiver) buildNarrativeSummary(state *PrisonState, gameEvents []events.GameEvent) string {
+func (p *Perceiver) buildNarrativeSummary(state *PrisonState, gameEvents []events.GameEvent, prisoners map[string]*prisoner.Prisoner) string {
 	var sb strings.Builder
 
 	sb.WriteString(fmt.Sprintf("=== INFORME DE SITUACIÓN: DÍA %d ===\n", state.CurrentDay))
@@ -162,6 +193,12 @@ func (p *Perceiver) buildNarrativeSummary(state *PrisonState, gameEvents []event
 	sb.WriteString(fmt.Sprintf("Cordura Promedio: %.1f%%\n", state.AverageSanity))
 	sb.WriteString(fmt.Sprintf("Traiciones Recientes: %d\n", state.RecentBetrayals))
 	sb.WriteString(fmt.Sprintf("Actividad de la Audiencia: %d intervenciones\n\n", state.AudienceActivity))
+
+	sb.WriteString("=== ESTADO DE PRISIONEROS ===\n")
+	for id, summary := range state.PrisonerSummaries {
+		sb.WriteString(fmt.Sprintf("[%s]: %s\n", prisoners[id].Name, summary))
+	}
+	sb.WriteString("\n")
 
 	// Add recent notable events
 	sb.WriteString("=== EVENTOS NOTABLES ===\n")
@@ -213,10 +250,14 @@ func (p *Perceiver) GetPrisonerProfile(prisonerID string, gameEvents []events.Ga
 		}
 	}
 
-	profile := fmt.Sprintf("Prisionero %s: %d acciones registradas. ", prisonerID, len(actions))
-	if len(sanityHistory) > 0 {
-		lastSanity := sanityHistory[len(sanityHistory)-1]
-		profile += fmt.Sprintf("Cordura actual: %d%%. ", lastSanity)
+	profile := fmt.Sprintf("%d actions.", len(actions))
+	if len(actions) > 0 { // track specific types
+		// Just take the last 3 actions for brevity
+		start := 0
+		if len(actions) > 3 {
+			start = len(actions) - 3
+		}
+		profile += " Recent: " + strings.Join(actions[start:], ", ")
 	}
 
 	return profile

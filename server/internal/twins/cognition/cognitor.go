@@ -29,6 +29,8 @@ type Decision struct {
 // ActionType constants for Los Gemelos actions.
 const (
 	ActionNoise        = "NOISE_TORTURE"
+	ActionAudioTorture = "AUDIO_TORTURE"
+	ActionLockdown     = "DOOR_LOCK"
 	ActionResourceCut  = "RESOURCE_CUT"
 	ActionRevealSecret = "REVEAL_SECRET"
 	ActionReward       = "REWARD"
@@ -37,8 +39,8 @@ const (
 
 // Cognitor is the decision-making core of Los Gemelos.
 type Cognitor struct {
-	logger       *logger.Logger
-	madRules     []MADRule
+	logger        *logger.Logger
+	madRules      []MADRule
 	sadObjectives []SADObjective
 }
 
@@ -51,8 +53,8 @@ type MADRule struct {
 
 // SADObjective defines a spectacle goal (Spectacle Amplification Directive).
 type SADObjective struct {
-	Name     string
-	Priority int // Higher = more important
+	Name      string
+	Priority  int // Higher = more important
 	CheckFunc func(state *perception.PrisonState) bool
 }
 
@@ -159,7 +161,7 @@ func (c *Cognitor) Decide(ctx context.Context, state *perception.PrisonState) (*
 		decision.Justification = "Acción bloqueada por reglas MAD. Los Gemelos observan."
 	}
 
-	c.logger.Event("COGNITION", "TWINS", 
+	c.logger.Event("COGNITION", "TWINS",
 		fmt.Sprintf("Decision: %s (Approved: %v)", decision.ActionType, decision.IsApproved))
 
 	return decision, nil
