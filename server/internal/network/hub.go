@@ -8,14 +8,7 @@ import (
 
 	"github.com/MRamiBalles/CarcelGemelosJuego/server/internal/events"
 	"github.com/MRamiBalles/CarcelGemelosJuego/server/internal/platform/logger"
-	"github.com/gorilla/websocket"
 )
-
-// Client represents an active WebSocket connection.
-type Client struct {
-	conn *websocket.Conn
-	send chan []byte
-}
 
 // Hub maintains the set of active clients and broadcasts messages to them.
 type Hub struct {
@@ -77,7 +70,7 @@ func (h *Hub) Run(ctx context.Context) {
 func (h *Hub) BroadcastEvent(event events.GameEvent) {
 	payload, err := json.Marshal(event)
 	if err != nil {
-		h.logger.Error("Failed to serialize GameEvent for WebSocket broadcast: %v", err)
+		h.logger.Error("Failed to serialize GameEvent for WebSocket broadcast")
 		return
 	}
 	h.broadcast <- payload
