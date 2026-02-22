@@ -19,6 +19,7 @@ const (
 	EventTypePrivacyBreach        EventType = "PRIVACY_BREACH"
 	EventTypeTimeTick             EventType = "TIME_TICK"
 	EventTypeSanityChange         EventType = "SANITY_CHANGE"
+	EventTypeIsolationChanged     EventType = "ISOLATION_CHANGED"
 	EventTypeLoyaltyChange        EventType = "LOYALTY_CHANGE"
 	EventTypeToiletUse            EventType = "TOILET_USE"
 	EventTypeDoorLock             EventType = "DOOR_LOCK"
