@@ -11,7 +11,7 @@ import (
 
 func TestToiletShame(t *testing.T) {
 	// Setup
-	el := events.NewEventLog()
+	el := events.NewEventLog(nil)
 	log := logger.NewLogger()
 	ss := NewSanitySystem(el, log)
 
@@ -56,7 +56,7 @@ func TestToiletShame(t *testing.T) {
 
 func TestLockdownSchedule(t *testing.T) {
 	// Setup
-	el := events.NewEventLog()
+	el := events.NewEventLog(nil)
 	log := logger.NewLogger()
 	ls := NewLockdownSystem(el, log)
 
@@ -88,7 +88,7 @@ func TestLockdownSchedule(t *testing.T) {
 
 func TestMysticDiet(t *testing.T) {
 	// Setup
-	el := events.NewEventLog()
+	el := events.NewEventLog(nil)
 	log := logger.NewLogger()
 	ms := NewMetabolismSystem(el, log)
 
@@ -124,7 +124,7 @@ func TestMysticDiet(t *testing.T) {
 
 func TestShortFuse(t *testing.T) {
 	// Setup
-	el := events.NewEventLog()
+	el := events.NewEventLog(nil)
 	log := logger.NewLogger()
 	ss := NewSanitySystem(el, log)
 

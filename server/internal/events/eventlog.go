@@ -51,17 +51,24 @@ type GameEvent struct {
 	IsRevealed bool        `json:"is_revealed"` // Exposed to audience?
 }
 
-// EventLog is the in-memory append-only log of game events.
-// In production, this would be backed by PostgreSQL/Redis.
-type EventLog struct {
-	mu     sync.RWMutex
-	events []GameEvent
+// EventPersister defines how an event is durably stored.
+type EventPersister interface {
+	Append(event GameEvent) error
 }
 
-// NewEventLog creates a new empty event log.
-func NewEventLog() *EventLog {
+// EventLog is the in-memory append-only log of game events.
+// In production, this would be backed by PostgreSQL/Redis or SQLite.
+type EventLog struct {
+	mu        sync.RWMutex
+	events    []GameEvent
+	persister EventPersister
+}
+
+// NewEventLog creates a new event log with an optional persister.
+func NewEventLog(persister EventPersister) *EventLog {
 	return &EventLog{
-		events: make([]GameEvent, 0),
+		events:    make([]GameEvent, 0),
+		persister: persister,
 	}
 }
 
@@ -70,6 +77,14 @@ func (el *EventLog) Append(event GameEvent) {
 	el.mu.Lock()
 	defer el.mu.Unlock()
 	el.events = append(el.events, event)
+
+	if el.persister != nil {
+		// Write through to persistent storage
+		// In a real high-throughput system this might be buffered/async
+		go func(e GameEvent) {
+			_ = el.persister.Append(e)
+		}(event)
+	}
 }
 
 // GetByActor returns all events performed by a specific actor.
