@@ -89,7 +89,7 @@ export default function VARReplay({ liveEvents = [] }: VARReplayProps) {
             {/* Timeline */}
             <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
                 {filteredEvents.map((event) => (
-                    <EventCard key={event.id} event={event as any} />
+                    <EventCard key={event.id} event={event} />
                 ))}
 
                 {filteredEvents.length === 0 && (
@@ -144,12 +144,15 @@ function FilterButton({ active, onClick, children }: {
     );
 }
 
-function EventCard({ event }: { event: typeof mockEvents[0] }) {
+function EventCard({ event }: { event: GameEvent }) {
+    const impact = event.payload?.impact || "NEUTRAL";
+    const summary = event.payload?.summary || `Evento de tipo ${event.type}`;
+
     const impactColor = {
         POSITIVE: "var(--sanity-green)",
         NEGATIVE: "var(--twins-red)",
         NEUTRAL: "var(--text-muted)",
-    }[event.impact];
+    }[impact as string] || "var(--text-muted)";
 
     const typeEmoji: Record<string, string> = {
         NOISE_EVENT: "🔊",
@@ -162,7 +165,7 @@ function EventCard({ event }: { event: typeof mockEvents[0] }) {
 
     return (
         <div
-            className={`timeline-event ${event.impact.toLowerCase()}`}
+            className={`timeline-event ${impact.toLowerCase()}`}
             style={{
                 padding: "16px",
                 paddingLeft: "32px",
@@ -193,10 +196,10 @@ function EventCard({ event }: { event: typeof mockEvents[0] }) {
                         fontSize: "14px",
                         fontWeight: 500,
                         marginBottom: "4px",
-                        color: event.revealed ? "inherit" : "var(--warning-amber)",
-                        fontStyle: event.revealed ? "normal" : "italic"
+                        color: event.is_revealed ? "inherit" : "var(--warning-amber)",
+                        fontStyle: event.is_revealed ? "normal" : "italic"
                     }}>
-                        {event.revealed ? event.summary : "⚠️ Anomalía Detectada: Procesando información del VAR..."}
+                        {event.is_revealed ? summary : "⚠️ Anomalía Detectada: Procesando información del VAR..."}
                     </div>
                     <div style={{
                         fontSize: "12px",
@@ -204,14 +207,14 @@ function EventCard({ event }: { event: typeof mockEvents[0] }) {
                         display: "flex",
                         gap: "16px"
                     }}>
-                        <span>Actor: {event.revealed ? event.actor : "[DATOS_CORRUPTOS]"}</span>
-                        <span>Día {event.day}</span>
+                        <span>Actor: {event.is_revealed ? event.actor_id : "[DATOS_CORRUPTOS]"}</span>
+                        <span>Día {event.game_day}</span>
                     </div>
                 </div>
 
                 {/* Badges */}
                 <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-                    {!event.revealed && (
+                    {!event.is_revealed && (
                         <span style={{
                             padding: "4px 8px",
                             background: "rgba(245, 158, 11, 0.15)",
@@ -231,7 +234,7 @@ function EventCard({ event }: { event: typeof mockEvents[0] }) {
                         fontSize: "10px",
                         color: impactColor,
                     }}>
-                        {event.impact}
+                        {impact}
                     </span>
                 </div>
 
@@ -242,7 +245,7 @@ function EventCard({ event }: { event: typeof mockEvents[0] }) {
                     fontFamily: "var(--font-mono)",
                     flexShrink: 0,
                 }}>
-                    {event.timestamp}
+                    {event.timestamp ? new Date(event.timestamp).toLocaleTimeString() : "--:--:--"}
                 </div>
             </div>
         </div>
