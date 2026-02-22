@@ -107,6 +107,43 @@ export default function TwinsControlPanel({ decisions, shadowMode, isLockdown = 
                     </div>
                 )}
             </div>
+            {/* Manual Overrides (Testing) */}
+            <div className="card" style={{ marginBottom: "24px", borderLeft: "4px solid var(--text-primary)" }}>
+                <div style={{ fontWeight: 600, fontSize: "14px", marginBottom: "16px" }}>
+                    🛠️ Overrides Manuales (Pruebas de API)
+                </div>
+                <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
+                    <button
+                        onClick={() => onTriggerOracle?.("P001", "La audiencia te observa, Simón.")}
+                        style={{
+                            padding: "8px 16px",
+                            background: "var(--bg-surface)",
+                            border: "1px solid var(--border-subtle)",
+                            borderRadius: "6px",
+                            color: "var(--text-primary)",
+                            cursor: "pointer",
+                            fontSize: "13px"
+                        }}
+                    >
+                        👁️ Enviar Oráculo (P001)
+                    </button>
+
+                    <button
+                        onClick={() => onTriggerTorture?.("SCREAM_01")}
+                        style={{
+                            padding: "8px 16px",
+                            background: "var(--bg-surface)",
+                            border: "1px solid var(--twins-red)",
+                            borderRadius: "6px",
+                            color: "var(--twins-red)",
+                            cursor: "pointer",
+                            fontSize: "13px"
+                        }}
+                    >
+                        🔊 Disparar Tortura (SCREAM_01)
+                    </button>
+                </div>
+            </div>
 
             {/* Stats */}
             <div style={{
