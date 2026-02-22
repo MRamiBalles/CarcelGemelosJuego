@@ -28,9 +28,6 @@ func NewIsolationSystem(eventLog *events.EventLog, log *logger.Logger) *Isolatio
 		logger:    log,
 	}
 
-	eventLog.Subscribe(events.EventTypeIsolationChanged, is.OnIsolationChanged)
-	eventLog.Subscribe(events.EventTypeTimeTick, is.OnTimeTick)
-
 	return is
 }
 

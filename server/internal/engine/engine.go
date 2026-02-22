@@ -123,11 +123,15 @@ func (e *Engine) dispatch(event events.GameEvent) {
 		e.sanitySystem.OnTimeTick(event)
 		e.socialSystem.OnTimeTick(event)
 		e.chaosSystem.OnTimeTick(event)
+		e.isolationSystem.OnTimeTick(event)
 
 		// Unmarshal payload if we need it for NoiseManager specifically
 		if payload, ok := event.Payload.(TimeTickPayload); ok {
 			e.noiseManager.OnTimeTick(payload)
 		}
+
+	case events.EventTypeIsolationChanged:
+		e.isolationSystem.OnIsolationChanged(event)
 
 	case events.EventTypeNoiseEvent:
 		e.sanitySystem.OnNoiseEvent(event)
