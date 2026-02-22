@@ -60,7 +60,7 @@ func main() {
 			return
 		}
 
-		eventLog.StoreEvent(events.GameEvent{
+		eventLog.RecordEvent(events.GameEvent{
 			Type:     events.EventTypeOraclePainfulTruth,
 			ActorID:  "Audience",
 			TargetID: req.Target,
@@ -89,7 +89,7 @@ func main() {
 			Duration:  30, // 30 in-game minutes of torture
 		}
 
-		eventLog.StoreEvent(events.GameEvent{
+		eventLog.RecordEvent(events.GameEvent{
 			Type:     events.EventTypeAudioTorture,
 			ActorID:  "Audience",
 			TargetID: "ALL",
