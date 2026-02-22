@@ -108,30 +108,31 @@ func NewSQLiteSnapshotRepository(db *sql.DB) *SQLiteSnapshotRepository {
 
 func (r *SQLiteSnapshotRepository) Upsert(ctx context.Context, snapshot PrisonerSnapshot) error {
 	query := `
-		INSERT INTO prisoners (prisoner_id, game_id, name, archetype, sanity, dignity, pot_contribution, is_sleeper, is_withdraw, last_updated)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		INSERT INTO prisoners (prisoner_id, game_id, name, archetype, sanity, dignity, pot_contribution, is_isolated, is_sleeper, is_withdraw, last_updated)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 		ON CONFLICT(prisoner_id) DO UPDATE SET
 			name=excluded.name,
 			archetype=excluded.archetype,
 			sanity=excluded.sanity,
 			dignity=excluded.dignity,
 			pot_contribution=excluded.pot_contribution,
+			is_isolated=excluded.is_isolated,
 			is_sleeper=excluded.is_sleeper,
 			is_withdraw=excluded.is_withdraw,
 			last_updated=excluded.last_updated
 	`
 	_, err := r.db.ExecContext(ctx, query,
 		snapshot.PrisonerID, snapshot.GameID, snapshot.Name, snapshot.Archetype,
-		snapshot.Sanity, snapshot.Dignity, 0.0, snapshot.IsSleeper, snapshot.IsWithdraw, time.Now(),
+		snapshot.Sanity, snapshot.Dignity, 0.0, snapshot.IsIsolated, snapshot.IsSleeper, snapshot.IsWithdraw, time.Now(),
 	)
 	return err
 }
 
 func (r *SQLiteSnapshotRepository) GetByPrisonerID(ctx context.Context, prisonerID string) (*PrisonerSnapshot, error) {
-	query := `SELECT prisoner_id, game_id, name, archetype, sanity, dignity, is_sleeper, is_withdraw FROM prisoners WHERE prisoner_id = ?`
+	query := `SELECT prisoner_id, game_id, name, archetype, sanity, dignity, is_isolated, is_sleeper, is_withdraw FROM prisoners WHERE prisoner_id = ?`
 	var p PrisonerSnapshot
 	err := r.db.QueryRowContext(ctx, query, prisonerID).Scan(
-		&p.PrisonerID, &p.GameID, &p.Name, &p.Archetype, &p.Sanity, &p.Dignity, &p.IsSleeper, &p.IsWithdraw,
+		&p.PrisonerID, &p.GameID, &p.Name, &p.Archetype, &p.Sanity, &p.Dignity, &p.IsIsolated, &p.IsSleeper, &p.IsWithdraw,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -143,7 +144,7 @@ func (r *SQLiteSnapshotRepository) GetByPrisonerID(ctx context.Context, prisoner
 }
 
 func (r *SQLiteSnapshotRepository) GetByGameID(ctx context.Context, gameID string) ([]PrisonerSnapshot, error) {
-	query := `SELECT prisoner_id, game_id, name, archetype, sanity, dignity, is_sleeper, is_withdraw FROM prisoners WHERE game_id = ?`
+	query := `SELECT prisoner_id, game_id, name, archetype, sanity, dignity, is_isolated, is_sleeper, is_withdraw FROM prisoners WHERE game_id = ?`
 	rows, err := r.db.QueryContext(ctx, query, gameID)
 	if err != nil {
 		return nil, err
@@ -153,7 +154,7 @@ func (r *SQLiteSnapshotRepository) GetByGameID(ctx context.Context, gameID strin
 	var snaps []PrisonerSnapshot
 	for rows.Next() {
 		var p PrisonerSnapshot
-		if err := rows.Scan(&p.PrisonerID, &p.GameID, &p.Name, &p.Archetype, &p.Sanity, &p.Dignity, &p.IsSleeper, &p.IsWithdraw); err != nil {
+		if err := rows.Scan(&p.PrisonerID, &p.GameID, &p.Name, &p.Archetype, &p.Sanity, &p.Dignity, &p.IsIsolated, &p.IsSleeper, &p.IsWithdraw); err != nil {
 			return nil, err
 		}
 		snaps = append(snaps, p)

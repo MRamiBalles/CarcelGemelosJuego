@@ -51,6 +51,7 @@ func createSchemas(db *sql.DB) error {
 			sanity INTEGER NOT NULL,
 			dignity INTEGER NOT NULL,
 			pot_contribution REAL NOT NULL DEFAULT 0.0,
+			is_isolated BOOLEAN NOT NULL DEFAULT 0,
 			traits_json TEXT,
 			is_sleeper BOOLEAN NOT NULL DEFAULT 0,
 			is_withdraw BOOLEAN NOT NULL DEFAULT 0,

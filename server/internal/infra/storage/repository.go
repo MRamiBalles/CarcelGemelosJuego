@@ -58,6 +58,7 @@ type PrisonerSnapshot struct {
 	Dignity     int       `json:"dignity" db:"dignity"`
 	Loyalty     int       `json:"loyalty" db:"loyalty"`
 	Empathy     int       `json:"empathy" db:"empathy"`
+	IsIsolated  bool      `json:"is_isolated" db:"is_isolated"`
 	IsSleeper   bool      `json:"is_sleeper" db:"is_sleeper"`
 	IsWithdraw  bool      `json:"is_withdraw" db:"is_withdraw"`
 	LastUpdated time.Time `json:"last_updated" db:"last_updated"`

@@ -60,10 +60,11 @@ type Prisoner struct {
 	Empathy int `json:"empathy"` // Hidden stat for betrayal checks
 
 	// State
-	IsSleeper bool            `json:"is_sleeper"`  // Disconnected player
-	DayInGame int             `json:"day_in_game"` // 1-21
-	Traits    []TraitID       `json:"traits"`      // Active passive abilities
-	States    map[StateID]int `json:"states"`      // Temporary effects (ID -> Duration Ticks)
+	IsIsolated bool            `json:"is_isolated"` // True if sent to the punishment cell
+	IsSleeper  bool            `json:"is_sleeper"`  // Disconnected player
+	DayInGame  int             `json:"day_in_game"` // 1-21
+	Traits     []TraitID       `json:"traits"`      // Active passive abilities
+	States     map[StateID]int `json:"states"`      // Temporary effects (ID -> Duration Ticks)
 }
 
 // NewPrisoner creates a fresh prisoner with default starting stats based on Archetype.

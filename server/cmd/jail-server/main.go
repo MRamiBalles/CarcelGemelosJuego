@@ -72,6 +72,7 @@ func bootstrapPrisoners(ctx context.Context, repo *storage.SQLiteSnapshotReposit
 				GameID:     "GAME_1",
 				Name:       p.Name,
 				Archetype:  string(p.Archetype),
+				IsIsolated: p.IsIsolated,
 				Sanity:     p.Sanity,
 				Dignity:    p.Dignity,
 			}
@@ -84,6 +85,7 @@ func bootstrapPrisoners(ctx context.Context, repo *storage.SQLiteSnapshotReposit
 			p := prisoner.NewPrisoner(snap.PrisonerID, snap.Name, prisoner.Archetype(snap.Archetype))
 			p.Sanity = snap.Sanity
 			p.Dignity = snap.Dignity
+			p.IsIsolated = snap.IsIsolated
 			eng.RegisterPrisoner(p)
 		}
 	}
@@ -144,6 +146,7 @@ func main() {
 						GameID:     "GAME_1",
 						Name:       p.Name,
 						Archetype:  string(p.Archetype),
+						IsIsolated: p.IsIsolated,
 						Sanity:     p.Sanity,
 						Dignity:    p.Dignity,
 					}
