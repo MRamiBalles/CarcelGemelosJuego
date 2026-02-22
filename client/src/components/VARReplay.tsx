@@ -89,7 +89,7 @@ export default function VARReplay({ liveEvents = [] }: VARReplayProps) {
             {/* Timeline */}
             <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
                 {filteredEvents.map((event) => (
-                    <EventCard key={event.id} event={event} />
+                    <EventCard key={event.id} event={event as any} />
                 ))}
 
                 {filteredEvents.length === 0 && (
