@@ -62,7 +62,14 @@ Reserved mechanics for late arrivals or replacements.
     *   **Unmutable:** In-game volume slider does not affect these events. (Player must lower system volume, risking missing game cues).
     *   *Trigger:* Randomly or by Audience Vote.
 
-## 5. The End Game: The Dilemma
+## 5. Phase 18: Reality Show Mechanics
+To adapt the game purely to the Twitch/"Cárcel de los Gemelos" format, these 4 mechanics dictate the Meta:
+*   **Isolation Module (Punishment Cell):** Twins AI can send rule-breakers here for 24h. Separates the duo. (Buffs Frank's Sanity, starves Toxic duos of Hype).
+*   **Audience Polling:** Daily API-driven polls where Twitch chat dictates who gets luxury food (Sushi) vs who gets Audio Tortured.
+*   **Patio Challenges:** A high-risk daily event (12:00 PM). One duo member can sacrifice 80% Stamina to win bonuses. Tests duo resource management.
+*   **Contraband & Snitching:** Hidden cell loot (phones, cigarettes). Using them grants massive buffs but lowers Loyalty. Snitching on rivals to the Twins transfers their Pot to you (but you get punished if lying).
+
+## 6. The End Game: The Dilemma
 On Day 21, the Vault opens.
 *   **Split:** 50/50. (Systems may flag this as "Boring" and punish).
 *   **Steal:** Take 100%. Partner dies.
