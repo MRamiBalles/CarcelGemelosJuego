@@ -1,24 +1,19 @@
 "use client";
 
 import { useState } from "react";
+import { GameEvent } from "@/hooks/useGameEngine";
 
-// Mock VAR events for demonstration
-const mockEvents = [
-    { id: "E001", timestamp: "17:45:23", day: 7, type: "NOISE_EVENT", actor: "SYSTEM_TWINS", summary: "Los Gemelos activaron tortura de ruido", impact: "NEGATIVE", revealed: true },
-    { id: "E002", timestamp: "17:30:00", day: 7, type: "SANITY_CHANGE", actor: "P001", summary: "La cordura de Simón bajó 15 puntos", impact: "NEGATIVE", revealed: true },
-    { id: "E003", timestamp: "16:45:12", day: 7, type: "BETRAYAL", actor: "P003", summary: "Marco traicionó a su compañero de celda", impact: "NEGATIVE", revealed: false },
-    { id: "E004", timestamp: "15:20:00", day: 7, type: "TWINS_DECISION", actor: "SYSTEM_TWINS", summary: "Los Gemelos decidieron observar", impact: "NEUTRAL", revealed: true },
-    { id: "E005", timestamp: "14:00:45", day: 6, type: "AUDIENCE_TORTURE", actor: "AUDIENCE", summary: "La audiencia votó por cortar el agua", impact: "NEGATIVE", revealed: true },
-    { id: "E006", timestamp: "12:30:00", day: 6, type: "RESOURCE_INTAKE", actor: "P002", summary: "Elena consumió ración de comida", impact: "POSITIVE", revealed: true },
-];
+interface VARReplayProps {
+    liveEvents?: GameEvent[];
+}
 
-export default function VARReplay() {
+export default function VARReplay({ liveEvents = [] }: VARReplayProps) {
     const [filter, setFilter] = useState<string>("ALL");
     const [showRevealed, setShowRevealed] = useState<boolean>(true);
 
-    const filteredEvents = mockEvents.filter(e => {
+    const filteredEvents = liveEvents.filter(e => {
         if (filter !== "ALL" && e.type !== filter) return false;
-        if (!showRevealed && e.revealed) return false;
+        if (!showRevealed && e.is_revealed) return false;
         return true;
     });
 
@@ -42,9 +37,9 @@ export default function VARReplay() {
 
                 {/* Stats */}
                 <div style={{ display: "flex", gap: "16px" }}>
-                    <MiniStat label="Total Eventos" value={mockEvents.length.toString()} />
-                    <MiniStat label="Traiciones" value={mockEvents.filter(e => e.type === "BETRAYAL").length.toString()} color="var(--twins-red)" />
-                    <MiniStat label="Secretos Ocultos" value={mockEvents.filter(e => !e.revealed).length.toString()} color="var(--warning-amber)" />
+                    <MiniStat label="Total Eventos" value={liveEvents.length.toString()} />
+                    <MiniStat label="Traiciones" value={liveEvents.filter(e => e.type === "BETRAYAL").length.toString()} color="var(--twins-red)" />
+                    <MiniStat label="Anomalías Ocultas" value={liveEvents.filter(e => !e.is_revealed).length.toString()} color="var(--warning-amber)" />
                 </div>
             </div>
 

@@ -16,9 +16,11 @@ interface TwinsControlPanelProps {
     isLockdown?: boolean;
     day21Dilemmas?: { prisoner: string; decision: 'BETRAY' | 'COLLABORATE' | 'PENDING' }[];
     onToggleShadowMode: () => void;
+    onTriggerOracle?: (target: string, message: string) => void;
+    onTriggerTorture?: (soundId: string) => void;
 }
 
-export default function TwinsControlPanel({ decisions, shadowMode, isLockdown = false, day21Dilemmas = [], onToggleShadowMode }: TwinsControlPanelProps) {
+export default function TwinsControlPanel({ decisions, shadowMode, isLockdown = false, day21Dilemmas = [], onToggleShadowMode, onTriggerOracle, onTriggerTorture }: TwinsControlPanelProps) {
     const actionEmoji: Record<string, string> = {
         NOISE_TORTURE: "🔊",
         REVEAL_SECRET: "👁️",
