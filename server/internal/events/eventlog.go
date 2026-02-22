@@ -20,6 +20,8 @@ const (
 	EventTypeTimeTick             EventType = "TIME_TICK"
 	EventTypeSanityChange         EventType = "SANITY_CHANGE"
 	EventTypeIsolationChanged     EventType = "ISOLATION_CHANGED"
+	EventTypePollCreated          EventType = "POLL_CREATED"
+	EventTypePollResolved         EventType = "POLL_RESOLVED"
 	EventTypeLoyaltyChange        EventType = "LOYALTY_CHANGE"
 	EventTypeToiletUse            EventType = "TOILET_USE"
 	EventTypeDoorLock             EventType = "DOOR_LOCK"

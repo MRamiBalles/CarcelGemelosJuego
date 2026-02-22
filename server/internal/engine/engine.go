@@ -23,6 +23,7 @@ type Engine struct {
 	lockdownSystem   *LockdownSystem
 	noiseManager     *NoiseManager
 	isolationSystem  *IsolationSystem
+	pollingSystem    *PollingSystem
 
 	// State
 	lastProcessedEvent int
@@ -43,6 +44,7 @@ func NewEngine(eventLog *events.EventLog, log *logger.Logger) *Engine {
 		lockdownSystem:   NewLockdownSystem(eventLog, log),
 		noiseManager:     NewNoiseManager(eventLog, log),
 		isolationSystem:  NewIsolationSystem(eventLog, log),
+		pollingSystem:    NewPollingSystem(eventLog, log),
 
 		lastProcessedEvent: 0,
 		prisoners:          make(map[string]*prisoner.Prisoner),
@@ -75,6 +77,7 @@ func (e *Engine) RegisterPrisoner(p *prisoner.Prisoner) {
 	e.chaosSystem.RegisterPrisoner(p)
 	e.metabolismSystem.RegisterPrisoner(p)
 	e.isolationSystem.RegisterPrisoner(p)
+	e.pollingSystem.RegisterPrisoner(p)
 	e.logger.Info("Prisoner registered with engine sub-systems: " + p.ID)
 }
 
@@ -87,6 +90,11 @@ func (e *Engine) GetPrisoners() map[string]*prisoner.Prisoner {
 // GetNoiseManager exposes the built-in NoiseManager for the Twins AI Executor.
 func (e *Engine) GetNoiseManager() *NoiseManager {
 	return e.noiseManager
+}
+
+// GetPollingSystem exposes the polling system for API endpoints.
+func (e *Engine) GetPollingSystem() *PollingSystem {
+	return e.pollingSystem
 }
 
 // processEvents listens to the EventLog and dispatches items to subsystems.
@@ -138,6 +146,12 @@ func (e *Engine) dispatch(event events.GameEvent) {
 
 	case events.EventTypeAudioTorture:
 		e.sanitySystem.OnAudioTortureEvent(event)
+
+	case events.EventTypePollCreated:
+		e.pollingSystem.OnPollCreated(event)
+
+	case events.EventTypePollResolved:
+		e.pollingSystem.OnPollResolved(event)
 
 	case events.EventTypeToiletUse:
 		e.sanitySystem.OnToiletUseEvent(event)
