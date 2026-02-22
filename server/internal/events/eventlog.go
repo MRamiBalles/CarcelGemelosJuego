@@ -30,7 +30,14 @@ const (
 	EventTypeSteal                EventType = "STEAL"
 	EventTypeFinalDilemmaStart    EventType = "FINAL_DILEMMA_START"
 	EventTypeFinalDilemmaDecision EventType = "FINAL_DILEMMA_DECISION"
+	EventTypeOraclePainfulTruth   EventType = "ORACLE_PAINFUL_TRUTH"
 )
+
+// AudioTorturePayload holds the details for unavoidable sound events
+type AudioTorturePayload struct {
+	SoundName string `json:"soundName"`
+	Duration  int    `json:"duration"` // in game minutes
+}
 
 // GameEvent represents an immutable record of an action in the game.
 type GameEvent struct {

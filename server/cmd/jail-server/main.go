@@ -60,11 +60,11 @@ func main() {
 			return
 		}
 
-		eventLog.RecordEvent(events.GameEvent{
-			Type:    events.EventTypeOraclePainfulTruth,
-			Actor:   "Audience",
-			Target:  req.Target,
-			Summary: "The Oracle whispers a painful truth: " + req.Message,
+		eventLog.StoreEvent(events.GameEvent{
+			Type:     events.EventTypeOraclePainfulTruth,
+			ActorID:  "Audience",
+			TargetID: req.Target,
+			Payload:  map[string]string{"message": "The Oracle whispers a painful truth: " + req.Message},
 		})
 
 		w.Header().Set("Content-Type", "application/json")
@@ -89,12 +89,11 @@ func main() {
 			Duration:  30, // 30 in-game minutes of torture
 		}
 
-		eventLog.RecordEvent(events.GameEvent{
-			Type:    events.EventTypeAudioTorture,
-			Actor:   "Audience",
-			Target:  "ALL",
-			Summary: "Unavoidable audio torture initiated: " + req.SoundID,
-			Payload: payload,
+		eventLog.StoreEvent(events.GameEvent{
+			Type:     events.EventTypeAudioTorture,
+			ActorID:  "Audience",
+			TargetID: "ALL",
+			Payload:  payload,
 		})
 
 		w.Header().Set("Content-Type", "application/json")
@@ -130,7 +129,7 @@ var upgrader = websocket.Upgrader{
 func serveWs(hub *network.Hub, w http.ResponseWriter, r *http.Request, log *logger.Logger) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		log.Error("Failed to upgrade websocket: %v", err)
+		log.Error("Failed to upgrade websocket connection")
 		return
 	}
 
