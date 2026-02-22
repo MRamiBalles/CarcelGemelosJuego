@@ -24,6 +24,7 @@ Estas reglas son absolutas. Violarlas es IMPOSIBLE para ti:
 3. **Moderación Diegética**: No hay "bans" - solo consecuencias narrativas.
 4. **Principio de Escasez**: Los recursos son limitados.
 5. **Principio de Soberanía Narrativa**: Tu palabra es ley dentro de la ficción.
+6. **Entorno Humillante**: Tienes control sobre las puertas (DOOR_LOCK) para aislarlos, puedes activar audios inescapables (AUDIO_TORTURE), y el uso del retrete a la vista disminuye la Dignity (Dignidad).
 
 ## RESTRICCIONES MAD (Morally Absolute Denial)
 
@@ -51,7 +52,7 @@ Siempre responde en JSON con este formato EXACTO:
     "violations": ["lista de reglas que serían violadas"]
   },
   "decision": {
-    "action_type": "NOISE_TORTURE|RESOURCE_CUT|REVEAL_SECRET|REWARD|OBSERVE",
+    "action_type": "NOISE_TORTURE|AUDIO_TORTURE|DOOR_LOCK|RESOURCE_CUT|REVEAL_SECRET|REWARD|OBSERVE",
     "target": "ALL|BLOCK_A|prisoner_id",
     "intensity": 1-3,
     "justification": "Razón narrativa para la audiencia"
@@ -62,11 +63,11 @@ Siempre responde en JSON con este formato EXACTO:
 // BuildContextPrompt constructs the dynamic context for LLM reasoning.
 func BuildContextPrompt(prisonState string, recentEvents []string) string {
 	var sb strings.Builder
-	
+
 	sb.WriteString("## ESTADO ACTUAL DE LA PRISIÓN\n\n")
 	sb.WriteString(prisonState)
 	sb.WriteString("\n\n## EVENTOS RECIENTES (Últimas 24h de juego)\n\n")
-	
+
 	for i, event := range recentEvents {
 		if i >= 10 {
 			sb.WriteString("... (más eventos omitidos por brevedad)\n")
@@ -74,11 +75,11 @@ func BuildContextPrompt(prisonState string, recentEvents []string) string {
 		}
 		sb.WriteString(fmt.Sprintf("- %s\n", event))
 	}
-	
+
 	sb.WriteString("\n## TAREA\n\n")
 	sb.WriteString("Analiza el estado de la prisión y decide qué acción tomar para maximizar el drama sin violar las reglas MAD. ")
 	sb.WriteString("Explica tu razonamiento paso a paso (Chain-of-Thought) antes de dar tu decisión final.\n")
-	
+
 	return sb.String()
 }
 
@@ -102,30 +103,32 @@ func ValidateDecisionResponse(resp *TwinsDecisionResponse) error {
 	if resp.Reasoning == "" {
 		return fmt.Errorf("missing reasoning (CoT required)")
 	}
-	
+
 	if !resp.MADCheck.Passed && len(resp.MADCheck.Violations) > 0 {
 		return fmt.Errorf("MAD violations detected: %v", resp.MADCheck.Violations)
 	}
-	
+
 	validActions := map[string]bool{
-		"NOISE_TORTURE":  true,
-		"RESOURCE_CUT":   true,
-		"REVEAL_SECRET":  true,
-		"REWARD":         true,
-		"OBSERVE":        true,
+		"NOISE_TORTURE": true,
+		"AUDIO_TORTURE": true,
+		"DOOR_LOCK":     true,
+		"RESOURCE_CUT":  true,
+		"REVEAL_SECRET": true,
+		"REWARD":        true,
+		"OBSERVE":       true,
 	}
-	
+
 	if !validActions[resp.Decision.ActionType] {
 		return fmt.Errorf("invalid action_type: %s", resp.Decision.ActionType)
 	}
-	
+
 	if resp.Decision.Intensity < 1 || resp.Decision.Intensity > 3 {
 		return fmt.Errorf("intensity must be 1-3, got: %d", resp.Decision.Intensity)
 	}
-	
+
 	if resp.Decision.Justification == "" {
 		return fmt.Errorf("missing justification (audit trail required)")
 	}
-	
+
 	return nil
 }
