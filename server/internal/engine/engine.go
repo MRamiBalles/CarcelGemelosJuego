@@ -25,6 +25,7 @@ type Engine struct {
 
 	// State
 	lastProcessedEvent int
+	prisoners          map[string]*prisoner.Prisoner
 }
 
 // NewEngine initializes the core game systems and dependencies.
@@ -42,6 +43,7 @@ func NewEngine(eventLog *events.EventLog, log *logger.Logger) *Engine {
 		noiseManager:     NewNoiseManager(eventLog, log),
 
 		lastProcessedEvent: 0,
+		prisoners:          make(map[string]*prisoner.Prisoner),
 	}
 
 	return e
@@ -60,11 +62,18 @@ func (e *Engine) Start(ctx context.Context) {
 
 // RegisterPrisoner adds a new player to all relevant subsystems.
 func (e *Engine) RegisterPrisoner(p *prisoner.Prisoner) {
+	e.prisoners[p.ID] = p
 	e.sanitySystem.RegisterPrisoner(p)
 	e.socialSystem.RegisterPrisoner(p)
 	e.chaosSystem.RegisterPrisoner(p)
 	e.metabolismSystem.RegisterPrisoner(p)
 	e.logger.Info("Prisoner registered with engine sub-systems: " + p.ID)
+}
+
+// GetPrisoners returns a snapshot of the current state of all players.
+// Used by the AI Perceiver to evaluate Dignity and Traits.
+func (e *Engine) GetPrisoners() map[string]*prisoner.Prisoner {
+	return e.prisoners
 }
 
 // processEvents listens to the EventLog and dispatches items to subsystems.
