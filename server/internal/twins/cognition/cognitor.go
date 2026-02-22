@@ -8,9 +8,11 @@ package cognition
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"math/rand"
 
+	"github.com/MRamiBalles/CarcelGemelosJuego/server/internal/infra/ai"
 	"github.com/MRamiBalles/CarcelGemelosJuego/server/internal/platform/logger"
 	"github.com/MRamiBalles/CarcelGemelosJuego/server/internal/twins/perception"
 )
@@ -40,6 +42,7 @@ const (
 // Cognitor is the decision-making core of Los Gemelos.
 type Cognitor struct {
 	logger        *logger.Logger
+	llm           ai.LLMProvider
 	madRules      []MADRule
 	sadObjectives []SADObjective
 }
@@ -59,9 +62,10 @@ type SADObjective struct {
 }
 
 // NewCognitor creates a new cognition module with default MAD rules.
-func NewCognitor(log *logger.Logger) *Cognitor {
+func NewCognitor(llm ai.LLMProvider, log *logger.Logger) *Cognitor {
 	c := &Cognitor{
 		logger: log,
+		llm:    llm,
 	}
 	c.initializeMADRules()
 	c.initializeSADObjectives()
@@ -252,9 +256,65 @@ func (c *Cognitor) buildJustification(state *perception.PrisonState, action stri
 }
 
 // DecideWithLLM uses an external LLM for complex decisions (future integration).
-func (c *Cognitor) DecideWithLLM(ctx context.Context, state *perception.PrisonState, llmClient interface{}) (*Decision, error) {
-	// TODO: Integrate with OpenAI/Anthropic/DeepSeek
-	// For now, fall back to rule-based decision
-	c.logger.Info("LLM integration pending. Using rule-based cognition.")
-	return c.Decide(ctx, state)
+func (c *Cognitor) DecideWithLLM(ctx context.Context, state *perception.PrisonState) (*Decision, error) {
+	if c.llm == nil {
+		c.logger.Info("COGNITION: No LLM configured. Falling back to rules.")
+		return c.Decide(ctx, state)
+	}
+
+	prompt := ai.BuildContextPrompt(state.NarrativeSummary, []string{}) // TODO: get recent events properly
+
+	req := ai.CompletionRequest{
+		Messages: []ai.Message{
+			{Role: "system", Content: ai.TwinsSystemPrompt},
+			{Role: "user", Content: prompt},
+		},
+		MaxTokens:      500,
+		Temperature:    0.7,
+		ResponseFormat: "json", // Instruct model to output JSON
+	}
+
+	resp, err := c.llm.Complete(ctx, req)
+	if err != nil {
+		c.logger.Error("COGNITION: LLM call failed: " + err.Error())
+		return c.Decide(ctx, state) // Fallback
+	}
+
+	var aiDecision ai.TwinsDecisionResponse
+	if err := json.Unmarshal([]byte(resp.Content), &aiDecision); err != nil {
+		c.logger.Error("COGNITION: Failed to parse LLM JSON: " + err.Error())
+		return c.Decide(ctx, state) // Fallback
+	}
+
+	if err := ai.ValidateDecisionResponse(&aiDecision); err != nil {
+		c.logger.Error("COGNITION: LLM decision invalid: " + err.Error())
+		return c.Decide(ctx, state) // Fallback
+	}
+
+	// Map to internal Decision format
+	finalDecision := &Decision{
+		ActionType:    aiDecision.Decision.ActionType,
+		Target:        aiDecision.Decision.Target,
+		Intensity:     aiDecision.Decision.Intensity,
+		Reason:        "LLM_AUTONOMOUS",
+		Justification: aiDecision.Decision.Justification,
+		Metadata: map[string]interface{}{
+			"reasoning": aiDecision.Reasoning,
+			"model":     resp.Model,
+		},
+	}
+
+	// Double-check against hardcoded MAD rules just in case the LLM hallucinated
+	finalDecision.IsApproved = c.runMADCheck(state, finalDecision.ActionType)
+
+	if !finalDecision.IsApproved {
+		c.logger.Warn("COGNITION: LLM action blocked by hard MAD rules: " + finalDecision.ActionType)
+		finalDecision.ActionType = ActionDoNothing
+		finalDecision.Justification = "Acción del Oráculo bloqueada por protocolo de seguridad."
+	}
+
+	c.logger.Event("COGNITION", "TWINS_LLM",
+		fmt.Sprintf("Decision: %s (Approved: %v)", finalDecision.ActionType, finalDecision.IsApproved))
+
+	return finalDecision, nil
 }

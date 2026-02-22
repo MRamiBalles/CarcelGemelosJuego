@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import PrisonerDashboard from "@/components/PrisonerDashboard";
 import TwinsControlPanel from "@/components/TwinsControlPanel";
+import { AdminPanel } from "@/components/admin/AdminPanel";
 import VARReplay from "@/components/VARReplay";
 import Header from "@/components/Header";
 import { useGameEngine } from "@/hooks/useGameEngine";
@@ -82,14 +83,17 @@ export default function Home() {
                     <PrisonerDashboard prisoners={mockPrisoners} />
                 )}
                 {activeTab === "twins" && (
-                    <TwinsControlPanel
-                        decisions={mockTwinsDecisions}
-                        shadowMode={shadowMode}
-                        onToggleShadowMode={() => setShadowMode(!shadowMode)}
-                        // Adding trigger callbacks mapped to the API
-                        onTriggerOracle={(target, message) => triggerOracle(target, message)}
-                        onTriggerTorture={(soundId) => triggerTorture(soundId)}
-                    />
+                    <div className="flex flex-col gap-6">
+                        <AdminPanel />
+                        <TwinsControlPanel
+                            decisions={mockTwinsDecisions}
+                            shadowMode={shadowMode}
+                            onToggleShadowMode={() => setShadowMode(!shadowMode)}
+                            // Adding trigger callbacks mapped to the API
+                            onTriggerOracle={(target, message) => triggerOracle(target, message)}
+                            onTriggerTorture={(soundId) => triggerTorture(soundId)}
+                        />
+                    </div>
                 )}
                 {activeTab === "var" && (
                     <VARReplay liveEvents={events} />

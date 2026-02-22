@@ -14,6 +14,7 @@ import (
 
 	"github.com/MRamiBalles/CarcelGemelosJuego/server/internal/engine"
 	"github.com/MRamiBalles/CarcelGemelosJuego/server/internal/events"
+	"github.com/MRamiBalles/CarcelGemelosJuego/server/internal/infra/ai"
 	"github.com/MRamiBalles/CarcelGemelosJuego/server/internal/network"
 	"github.com/MRamiBalles/CarcelGemelosJuego/server/internal/platform/logger"
 	"github.com/MRamiBalles/CarcelGemelosJuego/server/internal/twins"
@@ -41,7 +42,10 @@ func main() {
 	hub.StartEventPoller(ctx, eventLog)
 
 	appLogger.Info("Bootstrapping AI Cognition (Los Gemelos)...")
-	aiMind := twins.NewTwinsMind(eventLog, gameEngine, gameEngine.GetNoiseManager(), hub, appLogger)
+	budgetGate := ai.NewBudgetGate(10.0, 50.0) // $10/day, $50/month safety net
+	llmProvider := ai.NewOpenAIProvider(budgetGate)
+
+	aiMind := twins.NewTwinsMind(eventLog, gameEngine, llmProvider, gameEngine.GetNoiseManager(), hub, appLogger)
 	aiMind.SetGameID("GAME_1")
 	go aiMind.Start(ctx)
 

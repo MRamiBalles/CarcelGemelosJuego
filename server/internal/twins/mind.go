@@ -8,6 +8,7 @@ import (
 
 	"github.com/MRamiBalles/CarcelGemelosJuego/server/internal/engine"
 	"github.com/MRamiBalles/CarcelGemelosJuego/server/internal/events"
+	"github.com/MRamiBalles/CarcelGemelosJuego/server/internal/infra/ai"
 	"github.com/MRamiBalles/CarcelGemelosJuego/server/internal/network"
 	"github.com/MRamiBalles/CarcelGemelosJuego/server/internal/platform/logger"
 	"github.com/MRamiBalles/CarcelGemelosJuego/server/internal/twins/action"
@@ -31,13 +32,14 @@ type TwinsMind struct {
 func NewTwinsMind(
 	eventLog *events.EventLog,
 	stateProvider perception.StateProvider,
+	llmProvider ai.LLMProvider,
 	noiseManager *engine.NoiseManager,
 	wsHub *network.Hub,
 	log *logger.Logger,
 ) *TwinsMind {
 	return &TwinsMind{
 		perceiver: perception.NewPerceiver(eventLog, stateProvider, log),
-		cognitor:  cognition.NewCognitor(log),
+		cognitor:  cognition.NewCognitor(llmProvider, log),
 		executor:  action.NewExecutor(noiseManager, eventLog, wsHub, log),
 		logger:    log,
 		interval:  5 * time.Minute, // Evaluate every 5 real minutes
