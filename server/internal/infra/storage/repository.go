@@ -50,6 +50,8 @@ type EventRepository interface {
 type PrisonerSnapshot struct {
 	PrisonerID  string    `json:"prisoner_id" db:"prisoner_id"`
 	GameID      string    `json:"game_id" db:"game_id"`
+	Name        string    `json:"name" db:"name"`
+	Archetype   string    `json:"archetype" db:"archetype"`
 	Hunger      int       `json:"hunger" db:"hunger"`
 	Thirst      int       `json:"thirst" db:"thirst"`
 	Sanity      int       `json:"sanity" db:"sanity"`

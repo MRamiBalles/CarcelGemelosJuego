@@ -60,6 +60,11 @@ func (e *Engine) Start(ctx context.Context) {
 	go e.processEvents(ctx)
 }
 
+// OverrideTime allows external bootstrapping commands to set the internal clock directly.
+func (e *Engine) OverrideTime(day, hour int, tickNumber int64) {
+	e.ticker.SetTime(day, hour, tickNumber)
+}
+
 // RegisterPrisoner adds a new player to all relevant subsystems.
 func (e *Engine) RegisterPrisoner(p *prisoner.Prisoner) {
 	e.prisoners[p.ID] = p

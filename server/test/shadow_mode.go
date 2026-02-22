@@ -38,7 +38,7 @@ type TestResult struct {
 // NewDay1RiotTest creates the stress test harness.
 func NewDay1RiotTest() *Day1RiotTest {
 	log := logger.NewLogger()
-	el := events.NewEventLog()
+	el := events.NewEventLog(nil)
 
 	return &Day1RiotTest{
 		eventLog:  el,

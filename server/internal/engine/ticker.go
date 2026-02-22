@@ -48,6 +48,13 @@ func NewTicker(eventLog *events.EventLog, log *logger.Logger) *Ticker {
 	}
 }
 
+// SetTime allows hot-reloading the game clock state from persistence.
+func (t *Ticker) SetTime(day, hour int, tickNumber int64) {
+	t.gameDay = day
+	t.gameHour = hour
+	t.tickNumber = tickNumber
+}
+
 // Start begins the game loop. Call in a goroutine.
 func (t *Ticker) Start(ctx context.Context) {
 	t.logger.Info("Engine Ticker started. The Twins are watching...")
