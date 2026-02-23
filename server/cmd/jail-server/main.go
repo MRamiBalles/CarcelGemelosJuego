@@ -249,6 +249,56 @@ func main() {
 		})
 	})
 
+	http.HandleFunc("/api/poll/create", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+		var payload engine.PollPayload
+		if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+			http.Error(w, "Invalid payload", http.StatusBadRequest)
+			return
+		}
+
+		if payload.PollID == "" || len(payload.Options) < 2 {
+			http.Error(w, "Invalid poll definition", http.StatusBadRequest)
+			return
+		}
+
+		eventLog.Append(events.GameEvent{
+			ID:        events.GenerateEventID(),
+			Timestamp: time.Now(),
+			Type:      events.EventTypePollCreated,
+			ActorID:   "SYSTEM_ADMIN",
+			TargetID:  "ALL",
+			Payload:   payload,
+		})
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{"status": "ok", "message": "Poll created successfully"})
+	})
+
+	http.HandleFunc("/api/poll/vote", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+		type voteReq struct {
+			PollID string `json:"poll_id"`
+			Option string `json:"option"`
+		}
+		var req voteReq
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, "Invalid payload", http.StatusBadRequest)
+			return
+		}
+
+		gameEngine.GetPollingSystem().CastVote(req.PollID, req.Option)
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
+	})
+
 	go func() {
 		log.Println("[JAIL-SERVER] HTTP API & WS Server listening on :8080")
 		if err := http.ListenAndServe(":8080", nil); err != nil {
