@@ -7,7 +7,7 @@ export type EventType =
     | "LOYALTY_CHANGE" | "TOILET_USE" | "DOOR_LOCK" | "DOOR_OPEN"
     | "AUDIO_TORTURE" | "AGGRESSIVE_EMOTE" | "LOCKDOWN_BANG"
     | "INSULT" | "STEAL" | "FINAL_DILEMMA_START" | "FINAL_DILEMMA_DECISION"
-    | "ORACLE_PAINFUL_TRUTH";
+    | "ORACLE_PAINFUL_TRUTH" | "POLL_CREATED" | "POLL_RESOLVED" | "ISOLATION_CHANGED";
 
 export interface GameEvent {
     id: string;
@@ -97,5 +97,29 @@ export function useGameEngine(url: string = 'ws://localhost:8080/ws') {
         }
     };
 
-    return { events, isConnected, triggerOracle, triggerTorture };
+    const createPoll = async (payload: any) => {
+        try {
+            await fetch('http://localhost:8080/api/poll/create', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+        } catch (err) {
+            console.error("Failed to trigger Poll API", err);
+        }
+    };
+
+    const votePoll = async (pollId: string, option: string) => {
+        try {
+            await fetch('http://localhost:8080/api/poll/vote', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ poll_id: pollId, option })
+            });
+        } catch (err) {
+            console.error("Failed to trigger Vote API", err);
+        }
+    };
+
+    return { events, isConnected, triggerOracle, triggerTorture, createPoll, votePoll };
 }

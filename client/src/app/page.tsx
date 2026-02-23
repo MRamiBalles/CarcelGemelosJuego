@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import PrisonerDashboard from "@/components/PrisonerDashboard";
 import TwinsControlPanel from "@/components/TwinsControlPanel";
 import { AdminPanel } from "@/components/admin/AdminPanel";
+import PollWidget from "@/components/admin/PollWidget";
 import VARReplay from "@/components/VARReplay";
 import Header from "@/components/Header";
 import { useGameEngine } from "@/hooks/useGameEngine";
@@ -32,7 +33,7 @@ export default function Home() {
     const [tensionLevel, setTensionLevel] = useState("HIGH");
 
     // Live WebSocket connection to Go Engine
-    const { events, isConnected, triggerOracle, triggerTorture } = useGameEngine();
+    const { events, isConnected, triggerOracle, triggerTorture, createPoll, votePoll } = useGameEngine();
 
     return (
         <main className="min-h-screen" style={{ background: "var(--bg-void)" }}>
@@ -93,6 +94,7 @@ export default function Home() {
                             onTriggerOracle={(target, message) => triggerOracle(target, message)}
                             onTriggerTorture={(soundId) => triggerTorture(soundId)}
                         />
+                        <PollWidget events={events} createPoll={createPoll} votePoll={votePoll} />
                     </div>
                 )}
                 {activeTab === "var" && (

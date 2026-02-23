@@ -24,6 +24,7 @@ type Engine struct {
 	noiseManager     *NoiseManager
 	isolationSystem  *IsolationSystem
 	pollingSystem    *PollingSystem
+	patioSystem      *PatioSystem
 
 	// State
 	lastProcessedEvent int
@@ -45,6 +46,7 @@ func NewEngine(eventLog *events.EventLog, log *logger.Logger) *Engine {
 		noiseManager:     NewNoiseManager(eventLog, log),
 		isolationSystem:  NewIsolationSystem(eventLog, log),
 		pollingSystem:    NewPollingSystem(eventLog, log),
+		patioSystem:      NewPatioSystem(eventLog, log),
 
 		lastProcessedEvent: 0,
 		prisoners:          make(map[string]*prisoner.Prisoner),
@@ -78,6 +80,7 @@ func (e *Engine) RegisterPrisoner(p *prisoner.Prisoner) {
 	e.metabolismSystem.RegisterPrisoner(p)
 	e.isolationSystem.RegisterPrisoner(p)
 	e.pollingSystem.RegisterPrisoner(p)
+	e.patioSystem.RegisterPrisoner(p)
 	e.logger.Info("Prisoner registered with engine sub-systems: " + p.ID)
 }
 
@@ -132,6 +135,7 @@ func (e *Engine) dispatch(event events.GameEvent) {
 		e.socialSystem.OnTimeTick(event)
 		e.chaosSystem.OnTimeTick(event)
 		e.isolationSystem.OnTimeTick(event)
+		e.patioSystem.OnTimeTick(event)
 
 		// Unmarshal payload if we need it for NoiseManager specifically
 		if payload, ok := event.Payload.(TimeTickPayload); ok {
