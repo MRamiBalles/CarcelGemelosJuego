@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/MRamiBalles/CarcelGemelosJuego/server/internal/domain/prisoner"
@@ -53,7 +54,12 @@ func (ps *PatioSystem) OnTimeTick(event events.GameEvent) {
 		}
 	}
 
-	ps.logger.Info("Starting Daily Patio Challenge (Game Day: %v)", tickPayload.GameDay)
+	// Trigger ONLY at exactly 12:00
+	if tickPayload.GameHour != 12 {
+		return
+	}
+
+	ps.logger.Info(fmt.Sprintf("Starting Daily Patio Challenge (Game Day: %d)", tickPayload.GameDay))
 
 	// Pick a random participant who is NOT isolated and NOT a sleeper (keep it simple for now)
 	var validParticipants []*prisoner.Prisoner

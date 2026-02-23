@@ -25,6 +25,7 @@ type Engine struct {
 	isolationSystem  *IsolationSystem
 	pollingSystem    *PollingSystem
 	patioSystem      *PatioSystem
+	contrabandSystem *ContrabandSystem
 
 	// State
 	lastProcessedEvent int
@@ -47,6 +48,7 @@ func NewEngine(eventLog *events.EventLog, log *logger.Logger) *Engine {
 		isolationSystem:  NewIsolationSystem(eventLog, log),
 		pollingSystem:    NewPollingSystem(eventLog, log),
 		patioSystem:      NewPatioSystem(eventLog, log),
+		contrabandSystem: NewContrabandSystem(eventLog, log),
 
 		lastProcessedEvent: 0,
 		prisoners:          make(map[string]*prisoner.Prisoner),
@@ -81,6 +83,7 @@ func (e *Engine) RegisterPrisoner(p *prisoner.Prisoner) {
 	e.isolationSystem.RegisterPrisoner(p)
 	e.pollingSystem.RegisterPrisoner(p)
 	e.patioSystem.RegisterPrisoner(p)
+	e.contrabandSystem.RegisterPrisoner(p)
 	e.logger.Info("Prisoner registered with engine sub-systems: " + p.ID)
 }
 
