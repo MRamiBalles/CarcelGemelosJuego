@@ -6,6 +6,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/MRamiBalles/CarcelGemelosJuego/server/internal/engine"
 	"github.com/MRamiBalles/CarcelGemelosJuego/server/internal/events"
 	"github.com/MRamiBalles/CarcelGemelosJuego/server/internal/platform/logger"
 )
@@ -18,16 +19,18 @@ type Hub struct {
 	unregister chan *Client
 	mu         sync.Mutex
 	logger     *logger.Logger
+	engine     *engine.Engine // F5: To access prisoners state and eventlog
 }
 
 // NewHub initializes a new WebSocket Hub.
-func NewHub(log *logger.Logger) *Hub {
+func NewHub(log *logger.Logger, eng *engine.Engine) *Hub {
 	return &Hub{
 		broadcast:  make(chan []byte),
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
 		clients:    make(map[*Client]bool),
 		logger:     log,
+		engine:     eng,
 	}
 }
 

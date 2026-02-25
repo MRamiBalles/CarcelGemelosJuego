@@ -39,6 +39,10 @@ const (
 	EventTypeItemTransfer         EventType = "ITEM_TRANSFER"
 	EventTypeItemConsumed         EventType = "ITEM_CONSUMED"
 	EventTypeRedPhoneMessage      EventType = "RED_PHONE_MESSAGE"
+	EventTypeRedPhoneAnswer       EventType = "RED_PHONE_ANSWER"
+	EventTypeSnitch               EventType = "SNITCH"
+	EventTypeMeditate             EventType = "MEDITATE"
+	EventTypeOracleUse            EventType = "ORACLE_USE"
 )
 
 // AudioTorturePayload holds the details for unavoidable sound events
@@ -51,6 +55,7 @@ type AudioTorturePayload struct {
 type ToiletUsePayload struct {
 	PrisonerID string `json:"prisoner_id"`
 	IsObserved bool   `json:"is_observed"` // True if cellmate is looking/present
+	WarningMsg string `json:"warning_msg"` // F5: Message sent to cellmate
 }
 
 // DoorLockPayload holds the details for automated door lockdowns
@@ -63,6 +68,23 @@ type DoorLockPayload struct {
 // RedPhonePayload holds a message sent over the 24h Red Phone
 type RedPhonePayload struct {
 	Message string `json:"message"`
+}
+
+// SnitchPayload details a cross-cell betrayal
+type SnitchPayload struct {
+	TargetID string `json:"target_id"` // Quien es el chivado
+	Action   string `json:"action"`    // Que estaba haciendo (STEAL, TOILET)
+}
+
+// MeditatePayload details Tartaria's AoE skill
+type MeditatePayload struct {
+	TargetCells []string `json:"target_cells"`
+}
+
+// OracleUsePayload details Tartaria's painful truth
+type OracleUsePayload struct {
+	TargetID string `json:"target_id"`
+	Secret   string `json:"secret"`
 }
 
 // GameEvent represents an immutable record of an action in the game.
