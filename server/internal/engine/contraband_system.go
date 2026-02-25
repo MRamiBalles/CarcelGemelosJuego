@@ -15,6 +15,13 @@ type LootEventPayload struct {
 	SanityBuf int    `json:"sanity_buf"`
 }
 
+// SocialActionPayload describes a social action between prisoners.
+type SocialActionPayload struct {
+	ActorID    string `json:"actor_id"`
+	TargetID   string `json:"target_id"`
+	ActionType string `json:"action_type"`
+}
+
 // SnitchEventPayload handles players betraying others.
 type SnitchEventPayload struct {
 	ActorID       string `json:"actor_id"`
