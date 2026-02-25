@@ -15,13 +15,6 @@ type LootEventPayload struct {
 	SanityBuf int    `json:"sanity_buf"`
 }
 
-// SocialActionPayload describes a social action between prisoners.
-type SocialActionPayload struct {
-	ActorID    string `json:"actor_id"`
-	TargetID   string `json:"target_id"`
-	ActionType string `json:"action_type"`
-}
-
 // SnitchEventPayload handles players betraying others.
 type SnitchEventPayload struct {
 	ActorID       string `json:"actor_id"`
@@ -70,6 +63,20 @@ func (cs *ContrabandSystem) GenerateLoot(targetID string, itemName string, sanit
 
 	// Logging an obscured event to not expose it directly to full clients
 	cs.logger.Event("LOOT_ACQUIRED", target.ID, "Found hidden item: "+itemName)
+
+	// Emit event for event-sourcing (Reality Recap)
+	cs.eventLog.Append(events.GameEvent{
+		ID:        events.GenerateEventID(),
+		Timestamp: time.Now(),
+		Type:      events.EventTypeLootAcquired,
+		ActorID:   "SYSTEM_GEMELOS",
+		TargetID:  targetID,
+		Payload: LootEventPayload{
+			TargetID:  targetID,
+			ItemName:  itemName,
+			SanityBuf: sanityBuf,
+		},
+	})
 }
 
 // OnSocialAction intercepts ActionSnitch
@@ -100,8 +107,8 @@ func (cs *ContrabandSystem) OnSocialAction(event events.GameEvent) {
 	}
 
 	actor.Loyalty -= 20
-	if actor.Loyalty < 0 {
-		actor.Loyalty = 0
+	if actor.Loyalty < -100 {
+		actor.Loyalty = -100
 	}
 
 	snitchPayload := SnitchEventPayload{

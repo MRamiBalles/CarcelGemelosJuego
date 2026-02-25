@@ -3,6 +3,7 @@
 package events
 
 import (
+	"math/rand"
 	"sync"
 	"time"
 )
@@ -34,6 +35,7 @@ const (
 	EventTypeFinalDilemmaStart    EventType = "FINAL_DILEMMA_START"
 	EventTypeFinalDilemmaDecision EventType = "FINAL_DILEMMA_DECISION"
 	EventTypeOraclePainfulTruth   EventType = "ORACLE_PAINFUL_TRUTH"
+	EventTypeLootAcquired         EventType = "LOOT_ACQUIRED"
 )
 
 // AudioTorturePayload holds the details for unavoidable sound events
@@ -135,8 +137,9 @@ func GenerateEventID() string {
 func randomSuffix() string {
 	const letters = "abcdefghijklmnopqrstuvwxyz0123456789"
 	b := make([]byte, 6)
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	for i := range b {
-		b[i] = letters[time.Now().UnixNano()%int64(len(letters))]
+		b[i] = letters[r.Intn(len(letters))]
 	}
 	return string(b)
 }

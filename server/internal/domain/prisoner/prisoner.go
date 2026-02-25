@@ -78,6 +78,7 @@ func NewPrisoner(id, name string, archetype Archetype) *Prisoner {
 		Sanity:          100,
 		Dignity:         100,
 		HP:              100,
+		Stamina:         100,
 		Loyalty:         50,
 		Empathy:         50,
 		PotContribution: 0,

@@ -31,6 +31,13 @@ type EmotePayload struct {
 	TargetID  string `json:"target_id"`
 }
 
+// SocialActionPayload describes a social action between prisoners.
+type SocialActionPayload struct {
+	ActorID    string `json:"actor_id"`
+	TargetID   string `json:"target_id"`
+	ActionType string `json:"action_type"`
+}
+
 // NewSocialSystem creates a new social manager.
 func NewSocialSystem(eventLog *events.EventLog, log *logger.Logger) *SocialSystem {
 	return &SocialSystem{
