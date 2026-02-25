@@ -7,16 +7,16 @@ import { AdminPanel } from "@/components/admin/AdminPanel";
 import PollWidget from "@/components/admin/PollWidget";
 import VARReplay from "@/components/VARReplay";
 import Header from "@/components/Header";
-import { useGameEngine } from "@/hooks/useGameEngine";
+import { useGameEngine, GameEvent } from "@/hooks/useGameEngine";
 
 // Mock data for demonstration (would come from WebSocket in production)
 const mockPrisoners = [
-    { id: "P001", name: "Simón", archetype: "VETERAN", sanity: 72, loyalty: 45, online: true, dignity: 100, pot_contribution: 0 },
-    { id: "P002", name: "Elena", archetype: "MYSTIC", sanity: 85, loyalty: 60, online: true, dignity: 100, pot_contribution: 0 },
-    { id: "P003", name: "Marco", archetype: "SHOWMAN", sanity: 55, loyalty: 30, online: false, dignity: 100, pot_contribution: 0 },
-    { id: "P004", name: "Lucía", archetype: "REDEEMED", sanity: 90, loyalty: 75, online: true, dignity: 100, pot_contribution: 0 },
-    { id: "P005", name: "Diego", archetype: "VETERAN", sanity: 40, loyalty: 20, online: true, dignity: 100, pot_contribution: 0 },
-    { id: "P006", name: "Carla", archetype: "SHOWMAN", sanity: 65, loyalty: 55, online: false, dignity: 100, pot_contribution: 0 },
+    { id: "P001", name: "Simón", archetype: "VETERAN", sanity: 72, loyalty: 45, online: true, dignity: 100, pot_contribution: 0, stamina: 80, hunger: 20, thirst: 10, states: { Asleep: true }, inventory: [{ type: "WATER", quantity: 2, is_contraband: false }] },
+    { id: "P002", name: "Elena", archetype: "MYSTIC", sanity: 85, loyalty: 60, online: true, dignity: 100, pot_contribution: 0, stamina: 100, hunger: 0, thirst: 0, states: { Meditating: true }, inventory: [{ type: "ELIXIR", quantity: 1, is_contraband: true }] },
+    { id: "P003", name: "Marco", archetype: "SHOWMAN", sanity: 55, loyalty: 30, online: false, dignity: 100, pot_contribution: 0, stamina: 10, hunger: 50, thirst: 40, states: { Exhausted: true }, inventory: [] },
+    { id: "P004", name: "Lucía", archetype: "REDEEMED", sanity: 90, loyalty: 75, online: true, dignity: 100, pot_contribution: 0, stamina: 60, hunger: 10, thirst: 20, states: {}, inventory: [{ type: "RICE", quantity: 1, is_contraband: false }, { type: "SUSHI", quantity: 1, is_contraband: true }] },
+    { id: "P005", name: "Diego", archetype: "VETERAN", sanity: 40, loyalty: 20, online: true, dignity: 100, pot_contribution: 0, stamina: 50, hunger: 60, thirst: 70, states: { Isolated: true }, inventory: [] },
+    { id: "P006", name: "Carla", archetype: "SHOWMAN", sanity: 65, loyalty: 55, online: false, dignity: 100, pot_contribution: 0, stamina: 0, hunger: 100, thirst: 100, states: { Dead: true }, inventory: [] },
 ];
 
 const mockTwinsDecisions = [
@@ -31,9 +31,71 @@ export default function Home() {
     const [shadowMode, setShadowMode] = useState(true);
     const [gameDay, setGameDay] = useState(7);
     const [tensionLevel, setTensionLevel] = useState("HIGH");
+    const [toasts, setToasts] = useState<{ id: string, message: string, type: string }[]>([]);
 
     // Live WebSocket connection to Go Engine
     const { events, isConnected, triggerOracle, triggerTorture, createPoll, votePoll } = useGameEngine();
+
+    // Effect to catch new events and create toasts for significant ones
+    useEffect(() => {
+        if (events.length > 0) {
+            const latestEvent = events[0];
+            let toastMessage = "";
+            let toastType = "info";
+
+            switch (latestEvent.type) {
+                case "STEAL":
+                    toastMessage = `🚨 ROBBERY: ${latestEvent.actor_id} intentó robar.`;
+                    toastType = "warning";
+                    break;
+                case "SNITCH":
+                    toastMessage = `🐀 SNITCH: ${latestEvent.actor_id} chivó sobre ${latestEvent.target_id}!`;
+                    toastType = "error";
+                    break;
+                case "AUDIO_TORTURE":
+                    toastMessage = `🔊 TORTURA AUDITIVA: ${latestEvent.payload.soundName || "Ruido"}`;
+                    toastType = "error";
+                    break;
+                case "RED_PHONE_MESSAGE":
+                    toastMessage = `☎️ EL TELÉFONO ROJO ESTÁ SONANDO...`;
+                    toastType = "warning";
+                    break;
+                case "TOILET_USE":
+                    toastMessage = `🚽 ${latestEvent.actor_id} está usando el baño.`;
+                    break;
+                case "AUDIENCE_EXPULSION":
+                    toastMessage = `💀 LA AUDIENCIA HA EXPULSADO A ${latestEvent.target_id}`;
+                    toastType = "error";
+                    break;
+                case "MEDICAL_EVACUATION":
+                    toastMessage = `🚑 EMERGENCIA: ${latestEvent.target_id} requiere evacuación.`;
+                    toastType = "error";
+                    break;
+                case "ORACLE_USE":
+                    toastMessage = `🔮 ORÁCULO: Tartaria ha revelado un secreto mortal de ${latestEvent.target_id}`;
+                    toastType = "warning";
+                    break;
+                case "MEDITATE":
+                    toastMessage = `🧘 Tartaria está meditando (Drenando celdas contiguas)`;
+                    toastType = "info";
+                    break;
+            }
+
+            if (toastMessage) {
+                const id = latestEvent.id;
+                setToasts(prev => {
+                    // Prevent duplicate toasts if React re-renders quickly
+                    if (prev.find(t => t.id === id)) return prev;
+                    return [...prev, { id, message: toastMessage, type: toastType }].slice(-5);
+                });
+
+                // Auto-remove toast after 5 seconds
+                setTimeout(() => {
+                    setToasts(prev => prev.filter(t => t.id !== id));
+                }, 5000);
+            }
+        }
+    }, [events]);
 
     return (
         <main className="min-h-screen" style={{ background: "var(--bg-void)" }}>
@@ -71,6 +133,34 @@ export default function Home() {
                     </TabButton>
                 </div>
             </nav>
+
+            {/* Toasts Container */}
+            <div style={{
+                position: "fixed",
+                bottom: "24px",
+                right: "24px",
+                display: "flex",
+                flexDirection: "column",
+                gap: "8px",
+                zIndex: 1000
+            }}>
+                {toasts.map(toast => (
+                    <div key={toast.id} style={{
+                        background: toast.type === "error" ? "var(--twins-red)" : toast.type === "warning" ? "var(--warning-amber)" : "var(--bg-surface)",
+                        color: toast.type === "error" ? "white" : toast.type === "warning" ? "black" : "var(--text-primary)",
+                        padding: "12px 24px",
+                        borderRadius: "8px",
+                        boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.5)",
+                        border: "1px solid rgba(255,255,255,0.1)",
+                        animation: "slideIn 0.3s ease-out forwards",
+                        fontWeight: 500,
+                        fontSize: "14px",
+                        maxWidth: "400px",
+                    }}>
+                        {toast.message}
+                    </div>
+                ))}
+            </div>
 
             {/* Content  - Powered by WebSocket Events */}
             <div className="container" style={{ padding: "24px" }}>
