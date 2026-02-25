@@ -29,11 +29,13 @@ type PrisonState struct {
 	AudienceActivity  int               `json:"audience_activity"` // Sadism points spent recently
 	PrisonerSummaries map[string]string `json:"prisoner_summaries"`
 	NarrativeSummary  string            `json:"narrative_summary"` // LLM-ready context
+	RecentEventLogs   []string          `json:"recent_event_logs"` // Raw strings for LLM
 }
 
 // StateProvider allows the Perceiver to query current prisoner states
 type StateProvider interface {
 	GetPrisoners() map[string]*prisoner.Prisoner
+	GetCurrentTime() (int, int)
 }
 
 // Perceiver reads the EventLog and builds context for the Cognition module.
@@ -53,12 +55,14 @@ func NewPerceiver(el *events.EventLog, sp StateProvider, log *logger.Logger) *Pe
 }
 
 // BuildPrisonState analyzes recent events and builds a comprehensive state.
-func (p *Perceiver) BuildPrisonState(ctx context.Context, gameID string, currentDay int) (*PrisonState, error) {
+func (p *Perceiver) BuildPrisonState(ctx context.Context, gameID string) (*PrisonState, error) {
 	allEvents := p.eventLog.Replay()
+	currentDay, currentHour := p.state.GetCurrentTime()
 
 	state := &PrisonState{
 		GameID:            gameID,
 		CurrentDay:        currentDay,
+		CurrentHour:       currentHour,
 		PrisonerSummaries: make(map[string]string),
 	}
 
@@ -119,6 +123,11 @@ func (p *Perceiver) BuildPrisonState(ctx context.Context, gameID string, current
 		// Append event history to base profile
 		eventHistory := p.GetPrisonerProfile(id, recentEvents)
 		state.PrisonerSummaries[id] = baseProfile + " || " + eventHistory
+	}
+
+	for _, e := range recentEvents {
+		logStr := fmt.Sprintf("[Day %d] %s: Actor %s target %s", e.GameDay, string(e.Type), e.ActorID, e.TargetID)
+		state.RecentEventLogs = append(state.RecentEventLogs, logStr)
 	}
 
 	// Build narrative summary for LLM context

@@ -96,6 +96,11 @@ func (e *Engine) GetPrisoners() map[string]*prisoner.Prisoner {
 	return e.prisoners
 }
 
+// GetCurrentTime returns the current in-game day and hour from the ticker.
+func (e *Engine) GetCurrentTime() (int, int) {
+	return e.ticker.GetCurrentTime()
+}
+
 // GetNoiseManager exposes the built-in NoiseManager for the Twins AI Executor.
 func (e *Engine) GetNoiseManager() *NoiseManager {
 	return e.noiseManager

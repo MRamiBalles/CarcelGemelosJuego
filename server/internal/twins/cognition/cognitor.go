@@ -265,7 +265,7 @@ func (c *Cognitor) DecideWithLLM(ctx context.Context, state *perception.PrisonSt
 		return c.Decide(ctx, state)
 	}
 
-	prompt := ai.BuildContextPrompt(state.NarrativeSummary, []string{}) // TODO: get recent events properly
+	prompt := ai.BuildContextPrompt(state.NarrativeSummary, state.RecentEventLogs)
 
 	req := ai.CompletionRequest{
 		Messages: []ai.Message{
