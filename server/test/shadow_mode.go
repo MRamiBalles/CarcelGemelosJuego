@@ -42,8 +42,8 @@ func NewDay1RiotTest() *Day1RiotTest {
 
 	return &Day1RiotTest{
 		eventLog:  el,
-		perceiver: perception.NewPerceiver(el, log),
-		cognitor:  cognition.NewCognitor(log),
+		perceiver: perception.NewPerceiver(el, nil, log),
+		cognitor:  cognition.NewCognitor(nil, log),
 		logger:    log,
 		results:   make([]TestResult, 0),
 	}

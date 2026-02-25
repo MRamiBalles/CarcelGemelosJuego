@@ -68,11 +68,12 @@ type Prisoner struct {
 }
 
 // NewPrisoner creates a fresh prisoner with default starting stats based on Archetype.
-func NewPrisoner(id, name string, archetype Archetype) *Prisoner {
+func NewPrisoner(id, name string, archetype Archetype, cellID string) *Prisoner {
 	p := &Prisoner{
 		ID:              id,
 		Name:            name,
 		Archetype:       archetype,
+		CellID:          cellID,
 		Hunger:          100,
 		Thirst:          100,
 		Sanity:          100,

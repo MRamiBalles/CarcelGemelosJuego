@@ -59,12 +59,18 @@ func bootstrapPrisoners(ctx context.Context, repo *storage.SQLiteSnapshotReposit
 	if len(snaps) == 0 {
 		appLogger.Info("Database empty. Seeding Initial 6 Prisoners...")
 		starters := []*prisoner.Prisoner{
-			prisoner.NewPrisoner("P001", "Frank", prisoner.ArchetypeVeteran),
-			prisoner.NewPrisoner("P002", "Dakota", prisoner.ArchetypeExplosive),
-			prisoner.NewPrisoner("P003", "Aída", prisoner.ArchetypeChaos),
-			prisoner.NewPrisoner("P004", "Tartaria", prisoner.ArchetypeMystic),
-			prisoner.NewPrisoner("P005", "Héctor", prisoner.ArchetypeDeceiver),
-			prisoner.NewPrisoner("P006", "Ylenia", prisoner.ArchetypeToxic),
+			prisoner.NewPrisoner("P001", "Frank", prisoner.ArchetypeVeteran, "CELL_A"),
+			prisoner.NewPrisoner("P008", "Incógnita 1", prisoner.ArchetypeVeteran, "CELL_A"),
+			prisoner.NewPrisoner("P006", "Labrador", prisoner.ArchetypeToxic, "CELL_B"),
+			prisoner.NewPrisoner("P007", "Ylenia", prisoner.ArchetypeToxic, "CELL_B"),
+			prisoner.NewPrisoner("P003", "Aída", prisoner.ArchetypeChaos, "CELL_C"),
+			prisoner.NewPrisoner("P002", "Dakota", prisoner.ArchetypeExplosive, "CELL_C"),
+			prisoner.NewPrisoner("P004", "Tartaria", prisoner.ArchetypeMystic, "CELL_D"),
+			prisoner.NewPrisoner("P005", "Héctor", prisoner.ArchetypeDeceiver, "CELL_D"),
+			prisoner.NewPrisoner("P009", "Incógnita 2", prisoner.ArchetypeVeteran, "CELL_E"),
+			prisoner.NewPrisoner("P010", "Incógnita 3", prisoner.ArchetypeVeteran, "CELL_E"),
+			prisoner.NewPrisoner("P011", "Incógnita 4", prisoner.ArchetypeVeteran, "CELL_F"),
+			prisoner.NewPrisoner("P012", "Incógnita 5", prisoner.ArchetypeVeteran, "CELL_F"),
 		}
 		for _, p := range starters {
 			snap := storage.PrisonerSnapshot{
@@ -72,6 +78,7 @@ func bootstrapPrisoners(ctx context.Context, repo *storage.SQLiteSnapshotReposit
 				GameID:     "GAME_1",
 				Name:       p.Name,
 				Archetype:  string(p.Archetype),
+				CellID:     p.CellID,
 				IsIsolated: p.IsIsolated,
 				Sanity:     p.Sanity,
 				Dignity:    p.Dignity,
@@ -82,7 +89,7 @@ func bootstrapPrisoners(ctx context.Context, repo *storage.SQLiteSnapshotReposit
 	} else {
 		appLogger.Info("Reconstructing Prisoners from SQLite State...")
 		for _, snap := range snaps {
-			p := prisoner.NewPrisoner(snap.PrisonerID, snap.Name, prisoner.Archetype(snap.Archetype))
+			p := prisoner.NewPrisoner(snap.PrisonerID, snap.Name, prisoner.Archetype(snap.Archetype), snap.CellID)
 			p.Sanity = snap.Sanity
 			p.Dignity = snap.Dignity
 			p.IsIsolated = snap.IsIsolated
@@ -146,6 +153,7 @@ func main() {
 						GameID:     "GAME_1",
 						Name:       p.Name,
 						Archetype:  string(p.Archetype),
+						CellID:     p.CellID,
 						IsIsolated: p.IsIsolated,
 						Sanity:     p.Sanity,
 						Dignity:    p.Dignity,

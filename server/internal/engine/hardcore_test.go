@@ -16,11 +16,10 @@ func TestToiletShame(t *testing.T) {
 	ss := NewSanitySystem(el, log)
 
 	// Create Actors
-	user := prisoner.NewPrisoner("P1", "User", prisoner.ArchetypeVeteran)
-	user.CellID = "CELL_101"
+	user := prisoner.NewPrisoner("P1", "User", prisoner.ArchetypeVeteran, "CELL_101")
+	// cell assignment done by constructor
 
-	witness := prisoner.NewPrisoner("P2", "Witness", prisoner.ArchetypeDeceiver)
-	witness.CellID = "CELL_101"
+	witness := prisoner.NewPrisoner("P2", "Witness", prisoner.ArchetypeDeceiver, "CELL_101")
 	// Witness is NOT facing wall (default state)
 
 	ss.RegisterPrisoner(user)
@@ -93,7 +92,7 @@ func TestMysticDiet(t *testing.T) {
 	ms := NewMetabolismSystem(el, log)
 
 	// Create Mystic
-	mystic := prisoner.NewPrisoner("MYSTIC_1", "Tartaria", prisoner.ArchetypeMystic)
+	mystic := prisoner.NewPrisoner("MYSTIC_1", "Tartaria", prisoner.ArchetypeMystic, "CELL_201")
 	// Verify trait
 	if !mystic.HasTrait(prisoner.TraitBreatharian) {
 		t.Fatalf("Mystic should have Breatharian trait")
@@ -129,8 +128,8 @@ func TestShortFuse(t *testing.T) {
 	ss := NewSanitySystem(el, log)
 
 	// Create Actors
-	toxic := prisoner.NewPrisoner("TOX_1", "Dakota", prisoner.ArchetypeExplosive)
-	normal := prisoner.NewPrisoner("NRM_1", "Marco", prisoner.ArchetypeVeteran)
+	toxic := prisoner.NewPrisoner("TOX_1", "Dakota", prisoner.ArchetypeExplosive, "CELL_301")
+	normal := prisoner.NewPrisoner("NRM_1", "Marco", prisoner.ArchetypeVeteran, "CELL_301")
 
 	// Verify trait integration
 	if !toxic.HasTrait(prisoner.TraitShortFuse) {

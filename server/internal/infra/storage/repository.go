@@ -61,6 +61,7 @@ type PrisonerSnapshot struct {
 	IsIsolated  bool      `json:"is_isolated" db:"is_isolated"`
 	IsSleeper   bool      `json:"is_sleeper" db:"is_sleeper"`
 	IsWithdraw  bool      `json:"is_withdraw" db:"is_withdraw"`
+	CellID      string    `json:"cell_id" db:"cell_id"`
 	LastUpdated time.Time `json:"last_updated" db:"last_updated"`
 }
 
