@@ -42,8 +42,21 @@ const (
 
 // AudioTorturePayload holds the details for unavoidable sound events
 type AudioTorturePayload struct {
-	SoundName string `json:"soundName"`
-	Duration  int    `json:"duration"` // in game minutes
+	SoundName string `json:"soundName"` // e.g., "SIREN", "BABY_CRYING"
+	Duration  int    `json:"duration"`  // in game minutes
+}
+
+// ToiletUsePayload holds the details for the "Inodoro a la vista" event
+type ToiletUsePayload struct {
+	PrisonerID string `json:"prisoner_id"`
+	IsObserved bool   `json:"is_observed"` // True if cellmate is looking/present
+}
+
+// DoorLockPayload holds the details for automated door lockdowns
+type DoorLockPayload struct {
+	CellID   string `json:"cell_id"` // "CELL_A", etc., or "ALL"
+	IsLocked bool   `json:"is_locked"`
+	Duration int    `json:"duration"` // locked duration in minutes, 0 means indefinite
 }
 
 // GameEvent represents an immutable record of an action in the game.

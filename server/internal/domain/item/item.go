@@ -6,13 +6,15 @@ package item
 type ItemType string
 
 const (
-	ItemRice        ItemType = "RICE"         // Free, basic sustenance
-	ItemWater       ItemType = "WATER"        // Free, basic hydration
-	ItemSushi       ItemType = "SUSHI"        // Premium food, costs Hype
-	ItemCigarette   ItemType = "CIGARETTE"    // Contraband, restores sanity
-	ItemPhone       ItemType = "PHONE"        // Contraband, massive advantage
-	ItemElixir      ItemType = "ELIXIR"       // Mystic item, placebo effect
-	ItemDragonBlood ItemType = "DRAGON_BLOOD" // Mystic item, tradeable
+	ItemRice          ItemType = "RICE"           // Free, basic sustenance
+	ItemWater         ItemType = "WATER"          // Free, basic hydration
+	ItemSushi         ItemType = "SUSHI"          // Premium food, costs Hype
+	ItemCigarette     ItemType = "CIGARETTE"      // Contraband, restores sanity
+	ItemPhone         ItemType = "PHONE"          // Contraband, massive advantage
+	ItemElixir        ItemType = "ELIXIR"         // Mystic item, placebo effect
+	ItemDragonBlood   ItemType = "DRAGON_BLOOD"   // Mystic item, tradeable
+	ItemTemplarDagger ItemType = "TEMPLAR_DAGGER" // Weapon/Contraband
+	ItemOracleStaff   ItemType = "ORACLE_STAFF"   // Mystic item, event trigger
 )
 
 // ItemStack represents a quantity of a specific item type.
@@ -81,12 +83,37 @@ var Registry = map[ItemType]ItemDefinition{
 		SanityMod:    50,
 	},
 	ItemElixir: {
-		Name:        "Elixir de Tartaria",
-		Description: "Agua mezclada con tierra. El místico jura que cura todo.",
-		BaseValue:   100.0, // High perceived value
-		IsFood:      false,
-		Hydration:   5,
-		SanityMod:   5, // Placebo
+		Name:         "Elixir Sagrado Antiguo",
+		Description:  "Pequeño frasco líquido. El místico jura que cura todo.",
+		BaseValue:    100.0, // High perceived value
+		IsFood:       false,
+		IsContraband: false,
+		Hydration:    5,
+		SanityMod:    5, // Placebo
+	},
+	ItemDragonBlood: {
+		Name:         "Sangre de Dragón Petrificada",
+		Description:  "Piedras azules místicas. Se usan para rituales o trueque.",
+		BaseValue:    250.0,
+		IsFood:       false,
+		IsContraband: false,
+		SanityMod:    10,
+	},
+	ItemTemplarDagger: {
+		Name:         "Daga Templaria",
+		Description:  "Un arma blanca peligrosa y sagrada. Altamente prohibida.",
+		BaseValue:    1000.0,
+		IsFood:       false,
+		IsContraband: true, // Dangerous contraband
+		SanityMod:    0,
+	},
+	ItemOracleStaff: {
+		Name:         "Bastón del Oráculo",
+		Description:  "Canaliza verdades dolorosas. Provoca eventos psíquicos.",
+		BaseValue:    500.0,
+		IsFood:       false,
+		IsContraband: false,
+		SanityMod:    20,
 	},
 }
 
