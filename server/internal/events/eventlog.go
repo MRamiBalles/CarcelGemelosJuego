@@ -36,6 +36,8 @@ const (
 	EventTypeFinalDilemmaDecision EventType = "FINAL_DILEMMA_DECISION"
 	EventTypeOraclePainfulTruth   EventType = "ORACLE_PAINFUL_TRUTH"
 	EventTypeLootAcquired         EventType = "LOOT_ACQUIRED"
+	EventTypeItemTransfer         EventType = "ITEM_TRANSFER"
+	EventTypeItemConsumed         EventType = "ITEM_CONSUMED"
 )
 
 // AudioTorturePayload holds the details for unavoidable sound events
