@@ -212,5 +212,12 @@ func (e *Engine) dispatch(event events.GameEvent) {
 
 	case events.EventTypeFinalDilemmaDecision:
 		e.socialSystem.OnFinalDilemmaDecision(event)
+
+	case events.EventTypeAudienceExpulsion:
+		// Expel the prisoner immediately
+		if p, ok := e.prisoners[event.TargetID]; ok {
+			e.logger.Error("AUDIENCE EXPULSION EXECUTED FOR " + p.Name)
+			p.AddState(prisoner.StateDead, 0)
+		}
 	}
 }

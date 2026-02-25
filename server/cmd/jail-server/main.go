@@ -329,6 +329,43 @@ func main() {
 		json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
 	})
 
+	// F5: T099 Endpoint /api/audience/vote_expel
+	http.HandleFunc("/api/audience/vote_expel", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+
+		type voteExpelReq struct {
+			PrisonerID string `json:"prisoner_id"`
+		}
+
+		var req voteExpelReq
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, "Invalid payload", http.StatusBadRequest)
+			return
+		}
+
+		if req.PrisonerID == "" {
+			http.Error(w, "PrisonerID is required", http.StatusBadRequest)
+			return
+		}
+
+		// Emit the expulsion event
+		eventLog.Append(events.GameEvent{
+			ID:         events.GenerateEventID(),
+			Timestamp:  time.Now(),
+			Type:       events.EventTypeAudienceExpulsion,
+			ActorID:    "AUDIENCE",
+			TargetID:   req.PrisonerID,
+			Payload:    "EXPELLED_BY_VOTE",
+			IsRevealed: true,
+		})
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{"status": "ok", "message": "Expulsion event cast for " + req.PrisonerID})
+	})
+
 	go func() {
 		log.Println("[JAIL-SERVER] HTTP API & WS Server listening on :8080")
 		if err := http.ListenAndServe(":8080", nil); err != nil {

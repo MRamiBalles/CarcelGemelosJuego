@@ -43,6 +43,7 @@ const (
 	EventTypeSnitch               EventType = "SNITCH"
 	EventTypeMeditate             EventType = "MEDITATE"
 	EventTypeOracleUse            EventType = "ORACLE_USE"
+	EventTypeAudienceExpulsion    EventType = "AUDIENCE_EXPULSION"
 )
 
 // AudioTorturePayload holds the details for unavoidable sound events
