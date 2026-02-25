@@ -13,6 +13,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/MRamiBalles/CarcelGemelosJuego/server/internal/domain/item"
 	"github.com/MRamiBalles/CarcelGemelosJuego/server/internal/domain/prisoner"
 	"github.com/MRamiBalles/CarcelGemelosJuego/server/internal/engine"
 	"github.com/MRamiBalles/CarcelGemelosJuego/server/internal/events"
@@ -57,7 +58,7 @@ func bootstrapPrisoners(ctx context.Context, repo *storage.SQLiteSnapshotReposit
 	}
 
 	if len(snaps) == 0 {
-		appLogger.Info("Database empty. Seeding Initial 6 Prisoners...")
+		appLogger.Info("Database empty. Seeding Initial 12 Prisoners...")
 		starters := []*prisoner.Prisoner{
 			prisoner.NewPrisoner("P001", "Frank", prisoner.ArchetypeVeteran, "CELL_A"),
 			prisoner.NewPrisoner("P008", "Incógnita 1", prisoner.ArchetypeVeteran, "CELL_A"),
@@ -73,6 +74,14 @@ func bootstrapPrisoners(ctx context.Context, repo *storage.SQLiteSnapshotReposit
 			prisoner.NewPrisoner("P012", "Incógnita 5", prisoner.ArchetypeVeteran, "CELL_F"),
 		}
 		for _, p := range starters {
+			// Special Loot for Mr. Tartaria (P004)
+			if p.ID == "P004" {
+				p.AddItem(item.ItemElixir, 10)
+				p.AddItem(item.ItemDragonBlood, 5)
+				p.AddItem(item.ItemTemplarDagger, 1)
+				p.AddItem(item.ItemOracleStaff, 1)
+			}
+
 			snap := storage.PrisonerSnapshot{
 				PrisonerID: p.ID,
 				GameID:     "GAME_1",
