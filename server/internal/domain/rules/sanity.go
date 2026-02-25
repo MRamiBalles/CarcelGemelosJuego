@@ -34,6 +34,11 @@ func CalculateSanityDrain(p *prisoner.Prisoner, params SanityDrainParams) int {
 		baseDrain *= 2
 	}
 
+	// Exhaustion double damage
+	if p.HasState(prisoner.StateExhausted) {
+		baseDrain *= 2
+	}
+
 	return baseDrain
 }
 

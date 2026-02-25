@@ -37,6 +37,8 @@ const (
 	StateMeditating StateID = "Meditating" // Stunned but regenerating
 	StateStarvation StateID = "Starvation" // HP Drain
 	StateFacingWall StateID = "FacingWall" // Avoiding eye contact
+	StateExhausted  StateID = "Exhausted"  // Stamina 0 -> 2x Sanity drain
+	StateAsleep     StateID = "Asleep"     // Regenerating stamina, skips interaction
 )
 
 // Prisoner represents the state of a participant in the game.
