@@ -18,9 +18,10 @@ interface TwinsControlPanelProps {
     onToggleShadowMode: () => void;
     onTriggerOracle?: (target: string, message: string) => void;
     onTriggerTorture?: (soundId: string) => void;
+    voteExpel?: (prisonerId: string) => void;
 }
 
-export default function TwinsControlPanel({ decisions, shadowMode, isLockdown = false, day21Dilemmas = [], onToggleShadowMode, onTriggerOracle, onTriggerTorture }: TwinsControlPanelProps) {
+export default function TwinsControlPanel({ decisions, shadowMode, isLockdown = false, day21Dilemmas = [], onToggleShadowMode, onTriggerOracle, onTriggerTorture, voteExpel }: TwinsControlPanelProps) {
     const actionEmoji: Record<string, string> = {
         NOISE_TORTURE: "🔊",
         REVEAL_SECRET: "👁️",
@@ -141,6 +142,26 @@ export default function TwinsControlPanel({ decisions, shadowMode, isLockdown = 
                         }}
                     >
                         🔊 Disparar Tortura (SCREAM_01)
+                    </button>
+
+                    <button
+                        onClick={() => {
+                            if (window.confirm("¿Seguro que quieres desencadenar la Votación de Audiencia y EXPULSAR a un preso (Simulando P006)?")) {
+                                voteExpel?.("P006");
+                            }
+                        }}
+                        style={{
+                            padding: "8px 16px",
+                            background: "var(--twins-red)",
+                            border: "none",
+                            borderRadius: "6px",
+                            color: "white",
+                            cursor: "pointer",
+                            fontSize: "13px",
+                            fontWeight: 600
+                        }}
+                    >
+                        💀 INYECCIÓN AUDIENCIA (Expulsar P006)
                     </button>
                 </div>
             </div>
