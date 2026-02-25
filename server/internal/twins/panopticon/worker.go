@@ -112,8 +112,8 @@ func (w *Worker) cognitiveLoop(ctx context.Context) {
 		case <-evalInterval.C:
 			w.logger.Info("Panóptico initiating cognitive evaluation...")
 
-			// 1. Perceive
-			state, err := w.perceiver.BuildPrisonState(ctx, "GAME_1", 1) // Needs real game day tracking
+			// Reconstruct state from internal perceiver
+			state, err := w.perceiver.BuildPrisonState(ctx, "GAME_1")
 			if err != nil {
 				w.logger.Error("Panóptico perception failed: " + err.Error())
 				continue

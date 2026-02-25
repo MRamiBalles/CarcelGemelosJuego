@@ -83,7 +83,7 @@ func (tm *TwinsMind) runCycle(ctx context.Context) {
 	tm.logger.Info("Los Gemelos cycle: PERCEIVE -> DECIDE -> ACT")
 
 	// 1. PERCEIVE: Build current state
-	state, err := tm.perceiver.BuildPrisonState(ctx, tm.gameID, 1) // TODO: Get actual day
+	state, err := tm.perceiver.BuildPrisonState(ctx, tm.gameID)
 	if err != nil {
 		tm.logger.Error("Perception failed: " + err.Error())
 		return
@@ -109,7 +109,7 @@ func (tm *TwinsMind) runCycle(ctx context.Context) {
 func (tm *TwinsMind) ForceDecision(ctx context.Context, currentDay int) (*cognition.Decision, error) {
 	tm.executor.SetCurrentDay(currentDay)
 
-	state, err := tm.perceiver.BuildPrisonState(ctx, tm.gameID, currentDay)
+	state, err := tm.perceiver.BuildPrisonState(ctx, tm.gameID)
 	if err != nil {
 		return nil, err
 	}
