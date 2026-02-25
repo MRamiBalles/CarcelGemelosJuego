@@ -9,6 +9,11 @@ interface Prisoner {
     dignity: number;
     pot_contribution: number;
     online: boolean;
+    stamina: number;
+    hunger: number;
+    thirst: number;
+    states: Record<string, any>;
+    inventory: any[];
 }
 
 interface PrisonerDashboardProps {
@@ -72,6 +77,10 @@ function PrisonerCard({ prisoner, emoji }: { prisoner: Prisoner; emoji: string }
         prisoner.dignity < 60 ? "var(--warning-amber)" :
             "var(--sanity-green)";
 
+    const staminaColor = prisoner.stamina < 30 ? "var(--twins-red)" :
+        prisoner.stamina < 60 ? "var(--warning-amber)" :
+            "var(--loyalty-blue)";
+
     // Determine warnings based on archetype traits
     let traitWarning = null;
     if (prisoner.archetype === "VETERAN" && prisoner.sanity < 40) {
@@ -81,6 +90,9 @@ function PrisonerCard({ prisoner, emoji }: { prisoner: Prisoner; emoji: string }
     } else if (prisoner.archetype === "TOXIC" && prisoner.sanity < 30) {
         traitWarning = "⚠️ Relación Tóxica inminente (Bad Romance)";
     }
+
+    // Convert states object keys to an array for easy rendering
+    const activeStates = prisoner.states ? Object.keys(prisoner.states) : [];
 
     return (
         <div className="card" style={{ position: "relative" }}>
@@ -210,6 +222,64 @@ function PrisonerCard({ prisoner, emoji }: { prisoner: Prisoner; emoji: string }
                     ></div>
                 </div>
             </div>
+
+            {/* Stamina / Thirst / Hunger Layer (F4/F5) */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px", marginBottom: "12px" }}>
+                <div>
+                    <div style={{ fontSize: "10px", color: "var(--text-muted)", marginBottom: "4px" }}>Stamina</div>
+                    <div className="stat-bar" style={{ height: "4px" }}>
+                        <div className="stat-bar-fill" style={{ width: `${prisoner.stamina}%`, background: staminaColor }}></div>
+                    </div>
+                </div>
+                <div>
+                    <div style={{ fontSize: "10px", color: "var(--text-muted)", marginBottom: "4px" }}>Thirst</div>
+                    <div className="stat-bar" style={{ height: "4px" }}>
+                        <div className="stat-bar-fill" style={{ width: `${prisoner.thirst}%`, background: "var(--loyalty-blue)" }}></div>
+                    </div>
+                </div>
+                <div>
+                    <div style={{ fontSize: "10px", color: "var(--text-muted)", marginBottom: "4px" }}>Hunger</div>
+                    <div className="stat-bar" style={{ height: "4px" }}>
+                        <div className="stat-bar-fill" style={{ width: `${prisoner.hunger}%`, background: "var(--warning-amber)" }}></div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Inventory Box (F2) */}
+            {prisoner.inventory && prisoner.inventory.length > 0 && (
+                <div style={{ marginBottom: "12px", background: "var(--bg-card)", padding: "8px", borderRadius: "6px", display: "flex", flexWrap: "wrap", gap: "4px" }}>
+                    <div style={{ fontSize: "10px", color: "var(--text-muted)", width: "100%", marginBottom: "4px" }}>Inventario Físico</div>
+                    {prisoner.inventory.map((item, idx) => (
+                        <div key={idx} style={{
+                            fontSize: "12px",
+                            background: "var(--bg-surface)",
+                            padding: "2px 6px",
+                            borderRadius: "4px",
+                            border: item.is_contraband ? "1px solid var(--twins-red)" : "1px solid var(--border-light)"
+                        }} title={String(item.type)}>
+                            {item.quantity}x {item.type === "RICE" ? "🍚" : item.type === "WATER" ? "💧" : item.type === "ELIXIR" ? "🧪" : item.type === "SUSHI" ? "🍣" : "📦"}
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            {/* F4/F5 States Container */}
+            {activeStates.length > 0 && (
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "4px", marginBottom: "12px" }}>
+                    {activeStates.map(state => (
+                        <span key={state} style={{
+                            fontSize: "10px",
+                            padding: "2px 6px",
+                            borderRadius: "12px",
+                            background: state === "Dead" ? "var(--twins-red)" : state === "Exhausted" ? "var(--warning-amber)" : "var(--bg-surface)",
+                            color: state === "Dead" || state === "Exhausted" ? "white" : "var(--text-secondary)",
+                            fontWeight: state === "Dead" ? "bold" : "normal"
+                        }}>
+                            {state === "Asleep" ? "💤 Durmiendo" : state === "Exhausted" ? "😰 Exhausto" : state === "Isolated" ? "🧊 Aislado" : state === "Dead" ? "💀 Evacuado" : state === "Meditating" ? "🧘 Meditando" : state}
+                        </span>
+                    ))}
+                </div>
+            )}
 
             {/* Warnings container */}
             <div style={{ marginTop: "12px", display: "flex", flexDirection: "column", gap: "6px" }}>

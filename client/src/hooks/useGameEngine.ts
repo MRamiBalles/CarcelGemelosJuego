@@ -7,7 +7,7 @@ export type EventType =
     | "LOYALTY_CHANGE" | "TOILET_USE" | "DOOR_LOCK" | "DOOR_OPEN"
     | "AUDIO_TORTURE" | "AGGRESSIVE_EMOTE" | "LOCKDOWN_BANG"
     | "INSULT" | "STEAL" | "FINAL_DILEMMA_START" | "FINAL_DILEMMA_DECISION"
-    | "ORACLE_PAINFUL_TRUTH" | "POLL_CREATED" | "POLL_RESOLVED" | "ISOLATION_CHANGED";
+    | "POLL_CREATED" | "POLL_RESOLVED" | "ISOLATION_CHANGED" | "AUDIENCE_EXPULSION";
 
 export interface GameEvent {
     id: string;
@@ -24,14 +24,22 @@ export function useGameEngine(url: string = 'ws://localhost:8080/ws') {
     const [events, setEvents] = useState<GameEvent[]>([]);
     const [isConnected, setIsConnected] = useState(false);
     const wsRef = useRef<WebSocket | null>(null);
+    const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const reconnectAttemptsRef = useRef(0);
 
-    useEffect(() => {
-        // Initialize WebSocket connection
+    const connect = () => {
+        // Prevent multiple connections
+        if (wsRef.current && (wsRef.current.readyState === WebSocket.OPEN || wsRef.current.readyState === WebSocket.CONNECTING)) {
+            return;
+        }
+
+        console.log(`Attempting to connect to ${url}...`);
         const ws = new WebSocket(url);
 
         ws.onopen = () => {
             console.log("Connected to Game Engine WebSocket");
             setIsConnected(true);
+            reconnectAttemptsRef.current = 0; // Reset attempts on success
         };
 
         ws.onmessage = (event) => {
@@ -55,22 +63,51 @@ export function useGameEngine(url: string = 'ws://localhost:8080/ws') {
         ws.onclose = () => {
             console.log("Disconnected from Game Engine WebSocket");
             setIsConnected(false);
-            // Could add reconnection logic here
+
+            // Exponential backoff reconnection
+            const timeout = Math.min(1000 * Math.pow(2, reconnectAttemptsRef.current), 30000); // Max 30s
+            console.log(`Reconnecting in ${timeout / 1000} seconds...`);
+
+            reconnectTimeoutRef.current = setTimeout(() => {
+                reconnectAttemptsRef.current++;
+                connect();
+            }, timeout);
         };
 
         ws.onerror = (error) => {
             console.error("WebSocket Error:", error);
-            ws.close();
+            // OnError will usually be followed by OnClose, handled there.
         };
 
         wsRef.current = ws;
+    };
+
+    useEffect(() => {
+        connect();
 
         return () => {
-            if (ws.readyState === WebSocket.OPEN) {
-                ws.close();
+            if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
+            if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+                // Ensure we don't trigger the reconnect loop on deliberate unmount
+                wsRef.current.onclose = null;
+                wsRef.current.close();
             }
         };
     }, [url]);
+
+    // Send a player action to the WebSocket directly (F5 implementation)
+    const sendAction = (type: string, prisonerId: string, payload: any = {}) => {
+        if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+            const message = JSON.stringify({
+                type: type,
+                prisoner_id: prisonerId,
+                payload: payload
+            });
+            wsRef.current.send(message);
+        } else {
+            console.warn("Cannot send action, WebSocket is not open");
+        }
+    };
 
     // Expose a way to manually trigger audience APIs
     const triggerOracle = async (target: string, message: string) => {
@@ -121,5 +158,17 @@ export function useGameEngine(url: string = 'ws://localhost:8080/ws') {
         }
     };
 
-    return { events, isConnected, triggerOracle, triggerTorture, createPoll, votePoll };
+    const voteExpel = async (prisonerId: string) => {
+        try {
+            await fetch('http://localhost:8080/api/audience/vote_expel', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prisoner_id: prisonerId })
+            });
+        } catch (err) {
+            console.error("Failed to trigger Expulsion API", err);
+        }
+    };
+
+    return { events, isConnected, sendAction, triggerOracle, triggerTorture, createPoll, votePoll, voteExpel };
 }
