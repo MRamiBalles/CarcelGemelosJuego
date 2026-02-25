@@ -7,11 +7,11 @@ type Archetype string
 
 const (
 	ArchetypeVeteran   Archetype = "Veteran"   // Frank Cuesta
-	ArchetypeMystic    Archetype = "Mystic"    // Tartaria
-	ArchetypeChaos     Archetype = "Chaos"     // Aída
+	ArchetypeMystic    Archetype = "Mystic"    // Mr. Tartaria (Carles Torá)
+	ArchetypeChaos     Archetype = "Chaos"     // Aída Nízar
 	ArchetypeToxic     Archetype = "Toxic"     // Labrador & Ylenia
-	ArchetypeExplosive Archetype = "Explosive" // Dakota
-	ArchetypeDeceiver  Archetype = "Deceiver"  // Héctor
+	ArchetypeExplosive Archetype = "Explosive" // Dakota Tárraga
+	ArchetypeDeceiver  Archetype = "Deceiver"  // Héctor "Morritos"
 )
 
 // TraitID identifies a specific passive or active ability.
