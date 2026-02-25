@@ -9,9 +9,10 @@ import (
 
 // MetabolismSystem manages hunger, thirst, and class-specific biological rules.
 type MetabolismSystem struct {
-	eventLog  *events.EventLog
-	logger    *logger.Logger
-	prisoners map[string]*prisoner.Prisoner
+	eventLog          *events.EventLog
+	logger            *logger.Logger
+	prisoners         map[string]*prisoner.Prisoner
+	lastHourProcessed int
 }
 
 // Removed ResourceIntakePayload (moved to inventory_system.go)
@@ -19,9 +20,10 @@ type MetabolismSystem struct {
 // NewMetabolismSystem creates a new metabolism manager.
 func NewMetabolismSystem(eventLog *events.EventLog, log *logger.Logger) *MetabolismSystem {
 	return &MetabolismSystem{
-		eventLog:  eventLog,
-		logger:    log,
-		prisoners: make(map[string]*prisoner.Prisoner),
+		eventLog:          eventLog,
+		logger:            log,
+		prisoners:         make(map[string]*prisoner.Prisoner),
+		lastHourProcessed: -1,
 	}
 }
 
@@ -37,52 +39,117 @@ func (ms *MetabolismSystem) OnTimeTick(event events.GameEvent) {
 		return
 	}
 
-	// Only update once per hour to avoid spam/float issues
-	if payload.TickNumber%60 != 0 { // Assuming 60 ticks = 1 hour? Or just use GameHour change?
-		// The payload gives GameHour. We should update on hour change.
-		// But TimeTick is every minute.
-		// Let's rely on simple decay per tick for smoothness or per hour.
-		// Design says "Hardcore Timeline".
-		// Let's do small decrement every tick (1 min real = 2 min game).
-		// 100 Hunger / (21 days) is too slow.
-		// 100 Hunger / (3 days) = ~33 per day.
-		// ~1.5 per hour.
-		// If TickRate is 1 min, and each tick is 2 game hours... wait.
-		// Ticker.go says: "gameHour += 2". So 1 real minute = 2 game hours.
-		// So 12 ticks = 1 day.
-		// That's ultra fast. 21 days = 21 * 12 mins = 4 hours.
-		// Decay needs to be aggressive.
+	// We process metabolism per game hour to keep the math predictable
+	if payload.GameHour == ms.lastHourProcessed {
+		return
+	}
+	ms.lastHourProcessed = payload.GameHour
+
+	for _, p := range ms.prisoners {
+		// 1. Stamina and Sleep Mechanics
+		if p.HasState(prisoner.StateAsleep) {
+			// Regenerate stamina if fully resting and not starving
+			if p.Hunger > 0 {
+				p.Stamina += 6 // 60 per night (10 hours)
+				if p.Stamina > 100 {
+					p.Stamina = 100
+				}
+				// Remove Exhausted state if we regained enough stamina
+				if p.Stamina > 10 && p.HasState(prisoner.StateExhausted) {
+					delete(p.States, prisoner.StateExhausted)
+				}
+			} else {
+				ms.logger.Event("POOR_SLEEP", p.ID, "Cannot rest due to starvation")
+			}
+		} else {
+			// Decay stamina while awake
+			staminaDrain := 3
+			if p.HasTrait(prisoner.TraitInsomniac) {
+				staminaDrain = 1 // Aída needs less sleep
+			}
+			p.Stamina -= staminaDrain
+			if p.Stamina <= 0 {
+				p.Stamina = 0
+				p.AddState(prisoner.StateExhausted, 9999) // Indefinite until sleeps
+				ms.logger.Warn("EXHAUSTION: " + p.Name + " has collapsed from fatigue!")
+			}
+		}
+
+		// 2. Hydration Drain (Fast)
+		p.Thirst -= 5
+		if p.Thirst <= 0 {
+			p.Thirst = 0
+			p.HP -= 10 // Dehydration damage
+			ms.logger.Warn("DEHYDRATION: " + p.Name + " is taking damage!")
+		}
+
+		// 3. Starvation Logic (Moderate)
+		if !p.HasTrait(prisoner.TraitBreatharian) {
+			p.Hunger -= 2
+			if p.Hunger <= 0 {
+				p.Hunger = 0
+				p.HP -= 5 // Starvation damage
+				ms.logger.Warn("STARVATION: " + p.Name + " is taking damage!")
+			}
+		} else {
+			// Mystic (Tartaria): 21 Day Water Fasting
+			// No food intake required. Hunger decays but causes no HP damage.
+			p.Hunger -= 2
+			if p.Hunger < 0 {
+				p.Hunger = 0
+			}
+		}
+
+		// Death Check
+		if p.HP <= 0 {
+			ms.logger.Warn("CRITICAL: " + p.ID + " requires medical evacuation! HP reached 0.")
+		}
+	}
+}
+
+// OnDoorLockEvent handles sleep cycle initiation and termination.
+func (ms *MetabolismSystem) OnDoorLockEvent(event events.GameEvent) {
+	payload, ok := event.Payload.(events.DoorLockPayload)
+	if !ok {
+		return
 	}
 
 	for _, p := range ms.prisoners {
-		// Mystic: Breatharian - No hunger decay, but Stamina decay
-		if p.HasTrait(prisoner.TraitBreatharian) {
-			p.Stamina -= 1 // Decay stamina slightly
-			if p.Stamina < 0 {
-				p.Stamina = 0
-				// Maybe add "Weakness" state?
+		if payload.CellID == "ALL" || payload.CellID == p.CellID {
+			if payload.IsLocked {
+				p.AddState(prisoner.StateAsleep, 9999)
+				ms.logger.Info("SLEEP: " + p.Name + " goes to sleep.")
+			} else {
+				delete(p.States, prisoner.StateAsleep)
+				ms.logger.Info("WAKE: " + p.Name + " woke up.")
 			}
-			continue
 		}
+	}
+}
 
-		// Normal: Decay Hunger/Thirst
-		p.Hunger -= 2
-		p.Thirst -= 3
-
-		// Starvation check
-		if p.Hunger <= 0 {
-			p.Hunger = 0
-			p.HP -= 5 // Starvation damage
+// OnSleepInterruptEvent handles waking up prisoners due to noise or torture.
+func (ms *MetabolismSystem) OnSleepInterruptEvent(event events.GameEvent) {
+	if event.Type == events.EventTypeAudioTorture {
+		for _, p := range ms.prisoners {
+			if p.HasState(prisoner.StateAsleep) {
+				delete(p.States, prisoner.StateAsleep)
+				ms.logger.Warn("SLEEP_INTERRUPTED: " + p.Name + " was awakened by audio torture!")
+			}
 		}
-		if p.Thirst <= 0 {
-			p.Thirst = 0
-			p.HP -= 10 // Dehydration is faster
-		}
+		return
+	}
 
-		// Death check (handled by HealthSystem? Or here?)
-		if p.HP <= 0 {
-			// Trigger DEATH event?
-			ms.logger.Warn("PLAYER DYING: " + p.ID)
+	if event.Type == events.EventTypeNoiseEvent {
+		payload, ok := event.Payload.(NoiseEventPayload)
+		if ok {
+			for _, p := range ms.prisoners {
+				if payload.TargetZone == "ALL" || payload.TargetZone == p.CellID {
+					if p.HasState(prisoner.StateAsleep) {
+						delete(p.States, prisoner.StateAsleep)
+						ms.logger.Warn("SLEEP_INTERRUPTED: " + p.Name + " was awakened by noise!")
+					}
+				}
+			}
 		}
 	}
 }

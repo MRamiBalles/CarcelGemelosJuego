@@ -151,11 +151,16 @@ func (e *Engine) dispatch(event events.GameEvent) {
 	case events.EventTypeIsolationChanged:
 		e.isolationSystem.OnIsolationChanged(event)
 
+	case events.EventTypeDoorLock, events.EventTypeDoorOpen:
+		e.metabolismSystem.OnDoorLockEvent(event)
+
 	case events.EventTypeNoiseEvent:
 		e.sanitySystem.OnNoiseEvent(event)
+		e.metabolismSystem.OnSleepInterruptEvent(event)
 
 	case events.EventTypeAudioTorture:
 		e.sanitySystem.OnAudioTortureEvent(event)
+		e.metabolismSystem.OnSleepInterruptEvent(event)
 
 	case events.EventTypePollCreated:
 		e.pollingSystem.OnPollCreated(event)
