@@ -2,6 +2,8 @@
 // This package is PURE and must NOT import any infrastructure packages (network, events, platform).
 package prisoner
 
+import "github.com/MRamiBalles/CarcelGemelosJuego/server/internal/domain/item"
+
 // Archetype represents the class of the prisoner.
 type Archetype string
 
@@ -52,8 +54,9 @@ type Prisoner struct {
 	HP      int `json:"hp"`      // 0-100 (Physical Health)
 	Stamina int `json:"stamina"` // 0-100 (Energy/Fatigue)
 
-	// Economics
-	PotContribution float64 `json:"pot_contribution"` // Individual winnings
+	// Inventory & Economics
+	Inventory       []item.ItemStack `json:"inventory"`
+	PotContribution float64          `json:"pot_contribution"` // Individual winnings
 
 	// Social
 	Loyalty int `json:"loyalty"` // -100 to 100 (towards cellmate)
@@ -82,6 +85,7 @@ func NewPrisoner(id, name string, archetype Archetype, cellID string) *Prisoner 
 		Stamina:         100,
 		Loyalty:         50,
 		Empathy:         50,
+		Inventory:       []item.ItemStack{},
 		PotContribution: 0,
 		IsSleeper:       false,
 		DayInGame:       1,
@@ -144,4 +148,56 @@ func (p *Prisoner) TickStates() {
 // Legacy compatibility (to be refactored)
 func (p *Prisoner) IsWithdraw() bool {
 	return p.HasState(StateWithdrawal)
+}
+
+// --- Inventory Methods ---
+
+// AddItem adds an item to the prisoner's inventory.
+func (p *Prisoner) AddItem(itemType item.ItemType, quantity int) {
+	for i, stack := range p.Inventory {
+		if stack.Type == itemType {
+			p.Inventory[i].Quantity += quantity
+			return
+		}
+	}
+	p.Inventory = append(p.Inventory, item.ItemStack{Type: itemType, Quantity: quantity})
+}
+
+// RemoveItem attempts to remove a quantity of an item.
+// Returns false if the prisoner doesn't have enough.
+func (p *Prisoner) RemoveItem(itemType item.ItemType, quantity int) bool {
+	for i, stack := range p.Inventory {
+		if stack.Type == itemType {
+			if stack.Quantity >= quantity {
+				p.Inventory[i].Quantity -= quantity
+				if p.Inventory[i].Quantity == 0 {
+					// Remove the stack if it's empty
+					p.Inventory = append(p.Inventory[:i], p.Inventory[i+1:]...)
+				}
+				return true
+			}
+			return false // Has item, but not enough
+		}
+	}
+	return false // Does not have item
+}
+
+// HasItem checks if the prisoner has at least 'quantity' of 'itemType'.
+func (p *Prisoner) HasItem(itemType item.ItemType, quantity int) bool {
+	for _, stack := range p.Inventory {
+		if stack.Type == itemType && stack.Quantity >= quantity {
+			return true
+		}
+	}
+	return false
+}
+
+// CountItem returns the amount of an item the prisoner has.
+func (p *Prisoner) CountItem(itemType item.ItemType) int {
+	for _, stack := range p.Inventory {
+		if stack.Type == itemType {
+			return stack.Quantity
+		}
+	}
+	return 0
 }
