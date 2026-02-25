@@ -39,6 +39,8 @@ const (
 	StateFacingWall StateID = "FacingWall" // Avoiding eye contact
 	StateExhausted  StateID = "Exhausted"  // Stamina 0 -> 2x Sanity drain
 	StateAsleep     StateID = "Asleep"     // Regenerating stamina, skips interaction
+	StateIsolated   StateID = "Isolated"   // Cuarto Blanco, no beds, 2x noise damage
+	StateDead       StateID = "Dead"       // MedEvac or Expulsion
 )
 
 // Prisoner represents the state of a participant in the game.

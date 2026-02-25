@@ -48,18 +48,21 @@ func (ms *MetabolismSystem) OnTimeTick(event events.GameEvent) {
 	for _, p := range ms.prisoners {
 		// 1. Stamina and Sleep Mechanics
 		if p.HasState(prisoner.StateAsleep) {
-			// Regenerate stamina if fully resting and not starving
-			if p.Hunger > 0 {
-				p.Stamina += 6 // 60 per night (10 hours)
-				if p.Stamina > 100 {
-					p.Stamina = 100
+			// In White Room (Isolated), beds don't exist/work well, no regen
+			if !p.HasState(prisoner.StateIsolated) {
+				// Regenerate stamina if fully resting and not starving
+				if p.Hunger > 0 {
+					p.Stamina += 15 // Sleep regeneration F4
+					if p.Stamina > 100 {
+						p.Stamina = 100
+					}
+					// Remove Exhausted state if we regained enough stamina
+					if p.Stamina > 10 && p.HasState(prisoner.StateExhausted) {
+						delete(p.States, prisoner.StateExhausted)
+					}
+				} else {
+					ms.logger.Event("POOR_SLEEP", p.ID, "Cannot rest due to starvation")
 				}
-				// Remove Exhausted state if we regained enough stamina
-				if p.Stamina > 10 && p.HasState(prisoner.StateExhausted) {
-					delete(p.States, prisoner.StateExhausted)
-				}
-			} else {
-				ms.logger.Event("POOR_SLEEP", p.ID, "Cannot rest due to starvation")
 			}
 		} else {
 			// Decay stamina while awake

@@ -178,7 +178,7 @@ func main() {
 	}()
 
 	appLogger.Info("Bootstrapping WebSocket Hub...")
-	hub := network.NewHub(appLogger)
+	hub := network.NewHub(appLogger, gameEngine)
 	go hub.Run(ctx)
 	hub.StartEventPoller(ctx, eventLog)
 

@@ -106,6 +106,11 @@ func (e *Engine) GetPollingSystem() *PollingSystem {
 	return e.pollingSystem
 }
 
+// GetEventLog exposes the event log for the client to inject player actions.
+func (e *Engine) GetEventLog() *events.EventLog {
+	return e.eventLog
+}
+
 // processEvents listens to the EventLog and dispatches items to subsystems.
 func (e *Engine) processEvents(ctx context.Context) {
 	pollInterval := time.NewTicker(100 * time.Millisecond) // Poll the event log for new events
@@ -126,7 +131,26 @@ func (e *Engine) processEvents(ctx context.Context) {
 					e.dispatch(event)
 				}
 				e.lastProcessedEvent = len(allEvents)
+				e.checkMedicalEvacuations() // F5: Simon Factor
 			}
+		}
+	}
+}
+
+// checkMedicalEvacuations enforces the Simon Factor (F5)
+func (e *Engine) checkMedicalEvacuations() {
+	for _, p := range e.prisoners {
+		// If already dead/evacuated, skip
+		if p.HP <= 0 && p.HasState(prisoner.StateDead) {
+			continue
+		}
+
+		if p.HP <= 0 || p.Sanity <= 0 {
+			e.logger.Error("MEDICAL EVACUATION TRIGGERED FOR " + p.Name)
+			p.AddState(prisoner.StateDead, 0) // Permanent
+
+			// Optional: Emitting a formal event could be done here if needed
+			// Let's just log it and mark the state for now.
 		}
 	}
 }
