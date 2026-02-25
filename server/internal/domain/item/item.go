@@ -23,13 +23,14 @@ type ItemStack struct {
 
 // ItemDefinition provides metadata about an item type.
 type ItemDefinition struct {
-	Name        string
-	Description string
-	BaseValue   float64 // Value in Hype for trading
-	IsFood      bool
-	Nutrition   int // Hunger restoration
-	Hydration   int // Thirst restoration
-	SanityMod   int // Sanity restoration/drain
+	Name         string
+	Description  string
+	BaseValue    float64 // Value in Hype for trading
+	IsFood       bool
+	IsContraband bool
+	Nutrition    int // Hunger restoration
+	Hydration    int // Thirst restoration
+	SanityMod    int // Sanity restoration/drain
 }
 
 // Registry contains all known items and their properties.
@@ -62,20 +63,22 @@ var Registry = map[ItemType]ItemDefinition{
 		SanityMod:   15,
 	},
 	ItemCigarette: {
-		Name:        "Cigarrillo de Contrabando",
-		Description: "Relaja los nervios, pero está prohibido.",
-		BaseValue:   20.0,
-		IsFood:      false,
-		Nutrition:   0,
-		Hydration:   -5,
-		SanityMod:   25,
+		Name:         "Cigarrillo de Contrabando",
+		Description:  "Relaja los nervios, pero está prohibido.",
+		BaseValue:    20.0,
+		IsFood:       false,
+		IsContraband: true,
+		Nutrition:    0,
+		Hydration:    -5,
+		SanityMod:    25,
 	},
 	ItemPhone: {
-		Name:        "Teléfono Móvil Oculto",
-		Description: "Comunicación con el exterior. Objeto de máximo contrabando.",
-		BaseValue:   500.0,
-		IsFood:      false,
-		SanityMod:   50,
+		Name:         "Teléfono Móvil Oculto",
+		Description:  "Comunicación con el exterior. Objeto de máximo contrabando.",
+		BaseValue:    500.0,
+		IsFood:       false,
+		IsContraband: true,
+		SanityMod:    50,
 	},
 	ItemElixir: {
 		Name:        "Elixir de Tartaria",

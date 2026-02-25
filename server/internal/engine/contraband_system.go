@@ -3,6 +3,7 @@ package engine
 import (
 	"time"
 
+	"github.com/MRamiBalles/CarcelGemelosJuego/server/internal/domain/item"
 	"github.com/MRamiBalles/CarcelGemelosJuego/server/internal/domain/prisoner"
 	"github.com/MRamiBalles/CarcelGemelosJuego/server/internal/events"
 	"github.com/MRamiBalles/CarcelGemelosJuego/server/internal/platform/logger"
@@ -10,9 +11,8 @@ import (
 
 // LootEventPayload describes contraband discovered dynamically.
 type LootEventPayload struct {
-	TargetID  string `json:"target_id"`
-	ItemName  string `json:"item_name"`
-	SanityBuf int    `json:"sanity_buf"`
+	TargetID string        `json:"target_id"`
+	ItemType item.ItemType `json:"item_type"`
 }
 
 // SnitchEventPayload handles players betraying others.
@@ -29,16 +29,13 @@ type ContrabandSystem struct {
 	prisoners map[string]*prisoner.Prisoner
 	eventLog  *events.EventLog
 	logger    *logger.Logger
-	// Track who has contraband: TargetID -> true
-	hasContraband map[string]bool
 }
 
 func NewContrabandSystem(eventLog *events.EventLog, log *logger.Logger) *ContrabandSystem {
 	cs := &ContrabandSystem{
-		prisoners:     make(map[string]*prisoner.Prisoner),
-		eventLog:      eventLog,
-		logger:        log,
-		hasContraband: make(map[string]bool),
+		prisoners: make(map[string]*prisoner.Prisoner),
+		eventLog:  eventLog,
+		logger:    log,
 	}
 
 	return cs
@@ -49,20 +46,16 @@ func (cs *ContrabandSystem) RegisterPrisoner(p *prisoner.Prisoner) {
 }
 
 // GenerateLoot drops a hidden item randomly (e.g., called by Twins API or Cron).
-func (cs *ContrabandSystem) GenerateLoot(targetID string, itemName string, sanityBuf int) {
+func (cs *ContrabandSystem) GenerateLoot(targetID string, itemType item.ItemType) {
 	target, exists := cs.prisoners[targetID]
 	if !exists {
 		return
 	}
 
-	cs.hasContraband[targetID] = true
-	target.Sanity += sanityBuf
-	if target.Sanity > 100 {
-		target.Sanity = 100
-	}
+	target.AddItem(itemType, 1)
 
 	// Logging an obscured event to not expose it directly to full clients
-	cs.logger.Event("LOOT_ACQUIRED", target.ID, "Found hidden item: "+itemName)
+	cs.logger.Event("LOOT_ACQUIRED", target.ID, "Found hidden item: "+string(itemType))
 
 	// Emit event for event-sourcing (Reality Recap)
 	cs.eventLog.Append(events.GameEvent{
@@ -72,9 +65,8 @@ func (cs *ContrabandSystem) GenerateLoot(targetID string, itemName string, sanit
 		ActorID:   "SYSTEM_GEMELOS",
 		TargetID:  targetID,
 		Payload: LootEventPayload{
-			TargetID:  targetID,
-			ItemName:  itemName,
-			SanityBuf: sanityBuf,
+			TargetID: targetID,
+			ItemType: itemType,
 		},
 	})
 }
@@ -116,17 +108,27 @@ func (cs *ContrabandSystem) OnSocialAction(event events.GameEvent) {
 		TargetID: target.ID,
 	}
 
-	// Evaluate Snitch
-	if cs.hasContraband[target.ID] {
-		// Success: Target is caught. Snitch gets 50% of target Pot (simulated here as random static value for now)
+	// Evaluate Snitch: Check target inventory for contraband
+	hasContraband := false
+	for _, stack := range target.Inventory {
+		if def, ok := item.GetItem(stack.Type); ok && def.IsContraband {
+			hasContraband = true
+			target.RemoveItem(stack.Type, stack.Quantity) // Confiscate everything
+		}
+	}
+
+	if hasContraband {
+		// Success: Target is caught. Snitch gets 50% of target Pot.
 		snitchPayload.Success = true
-		snitchPayload.PotStolen = 500
+		reward := target.PotContribution * 0.5
+		snitchPayload.PotStolen = int(reward)
+		actor.PotContribution += reward
+		target.PotContribution -= reward
 
 		target.Sanity -= 40
 		if target.Sanity < 0 {
 			target.Sanity = 0
 		}
-		delete(cs.hasContraband, target.ID)
 
 		cs.logger.Event("SNITCH_SUCCESS", actor.ID, "Caught "+target.ID+" with contraband")
 

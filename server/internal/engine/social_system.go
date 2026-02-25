@@ -97,9 +97,10 @@ func (ss *SocialSystem) OnAggressiveEmote(event events.GameEvent) {
 	if actor.HasTrait(prisoner.TraitBadRomance) && payload.EmoteType == "AGGRESSIVE" {
 		target, ok := ss.prisoners[payload.TargetID]
 		if ok && target.CellID == actor.CellID {
-			// Generates Hype (Internal currency - adding PotContribution as placeholder for economy)
-			actor.PotContribution += 10
-			ss.logger.Event("HYPE_GENERATED", actor.ID, "Arguing with "+target.ID)
+			// Generates Hype (Shared Pot)
+			actor.PotContribution += 5.0
+			target.PotContribution += 5.0
+			ss.logger.Event("HYPE_GENERATED", actor.CellID, "Arguing in cell generates €10")
 		}
 	}
 }
