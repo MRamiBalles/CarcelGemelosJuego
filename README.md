@@ -18,6 +18,7 @@ El proyecto está estructurado no solo como un hito técnico, sino como un produ
 - ⚖️ [**Marco Legal y Compliance**](docs/legal.md) (GDPR, IA EU Act, EULA, Limitación de Responsabilidad).
 - 📜 [**La Constitución (Core Design)**](docs/constitution.md) (Filosofía de Game Design y el Dilema del Prisionero).
 - 🛠️ [**Especificaciones Técnicas**](docs/spec.md) (Arquitectura y Mecánicas).
+- 🏗️ [**Arquitectura Técnica Detallada (F1-F6)**](docs/technical_architecture.md) (EventSourcing, Sistemas, Motor).
 
 ## ⚙️ Arquitectura Tecnológica
 Construido bajo el paradigma de **Spec-Driven Development (SDD)** y **Clean Architecture**.
