@@ -116,8 +116,12 @@ func main() {
 
 	appLogger := logger.NewLogger()
 
-	appLogger.Info("Initializing SQLite database 'jail.db'...")
-	db, err := storage.InitSQLite("jail.db")
+	dbPath := os.Getenv("DB_PATH")
+	if dbPath == "" {
+		dbPath = "jail.db"
+	}
+	appLogger.Info("Initializing SQLite database at '" + dbPath + "'...")
+	db, err := storage.InitSQLite(dbPath)
 	if err != nil {
 		appLogger.Error("Failed to initialize SQLite: " + err.Error())
 		os.Exit(1)
