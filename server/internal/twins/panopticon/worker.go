@@ -120,19 +120,17 @@ func (w *Worker) cognitiveLoop(ctx context.Context) {
 			}
 
 			// 2. Decide
-			decisions, err := w.cognitor.Decide(ctx, state)
+			decision, err := w.cognitor.Decide(ctx, state)
 			if err != nil {
 				w.logger.Error("Panóptico cognition failed: " + err.Error())
 				continue
 			}
 
 			// 3. Act
-			w.logger.Info("Panóptico executing decisions...")
-			for _, dec := range decisions {
-				err = w.executor.Execute(dec)
-				if err != nil {
-					w.logger.Error("Failed to execute action: " + err.Error())
-				}
+			w.logger.Info("Panóptico executing decision...")
+			err = w.executor.Execute(ctx, decision)
+			if err != nil {
+				w.logger.Error("Failed to execute action: " + err.Error())
 			}
 		}
 	}

@@ -49,8 +49,12 @@ func (ls *LockdownSystem) emitLockEvent(eventType events.EventType, day int) {
 		Type:      eventType,
 		ActorID:   "SYSTEM_LOCKDOWN",
 		TargetID:  "ALL_CELLS",
-		Payload:   map[string]string{"action": string(eventType)},
-		GameDay:   day,
+		Payload: events.DoorLockPayload{
+			CellID:   "ALL",
+			IsLocked: eventType == events.EventTypeDoorLock,
+			Duration: 0,
+		},
+		GameDay: day,
 	}
 	ls.eventLog.Append(event)
 }

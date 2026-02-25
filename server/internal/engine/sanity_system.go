@@ -103,9 +103,28 @@ func (ss *SanitySystem) OnNoiseEvent(noiseEvent events.GameEvent) {
 }
 
 // OnAudioTortureEvent handles inescapable audio torture.
-// It reuses the noise logic but the client treats it differently (bypass volume).
+// It applies a severe, duration-based sanity hit to all prisoners.
 func (ss *SanitySystem) OnAudioTortureEvent(event events.GameEvent) {
-	ss.OnNoiseEvent(event)
+	payload, ok := event.Payload.(events.AudioTorturePayload)
+	if !ok {
+		ss.logger.Error("Failed to parse AudioTorturePayload")
+		return
+	}
+
+	// 1 minute of audio torture = 1 sanity damage (approximate)
+	drain := payload.Duration / 2
+	if drain < 5 {
+		drain = 5 // Minimum 5 sanity hit
+	}
+
+	for _, p := range ss.prisoners {
+		p.Sanity -= drain
+		if p.Sanity < 0 {
+			p.Sanity = 0
+			ss.logger.Warn("BREAKDOWN: " + p.Name + " reached 0 Sanity from Audio Torture!")
+		}
+		ss.emitSanityChange(p.ID, -drain, "AUDIO_TORTURE", event.ID)
+	}
 }
 
 // ToiletUsePayload carries data about a toilet usage action.

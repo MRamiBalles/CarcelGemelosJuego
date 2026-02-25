@@ -218,8 +218,12 @@ func (e *Executor) executeLockdown(decision *cognition.Decision) error {
 		Type:      events.EventTypeDoorLock,
 		ActorID:   "SYSTEM_TWINS",
 		TargetID:  "ALL",
-		Payload:   map[string]interface{}{"reason": decision.Justification},
-		GameDay:   e.currentDay,
+		Payload: events.DoorLockPayload{
+			CellID:   "ALL",
+			IsLocked: true,
+			Duration: 60,
+		},
+		GameDay: e.currentDay,
 	}
 
 	e.eventLog.Append(event)
