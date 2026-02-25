@@ -22,6 +22,10 @@ import (
 	"github.com/MRamiBalles/CarcelGemelosJuego/server/internal/network"
 	"github.com/MRamiBalles/CarcelGemelosJuego/server/internal/platform/logger"
 	"github.com/MRamiBalles/CarcelGemelosJuego/server/internal/twins"
+	"github.com/MRamiBalles/CarcelGemelosJuego/server/internal/twins/action"
+	"github.com/MRamiBalles/CarcelGemelosJuego/server/internal/twins/cognition"
+	"github.com/MRamiBalles/CarcelGemelosJuego/server/internal/twins/panopticon"
+	"github.com/MRamiBalles/CarcelGemelosJuego/server/internal/twins/perception"
 	"github.com/gorilla/websocket"
 )
 
@@ -181,7 +185,16 @@ func main() {
 	appLogger.Info("Bootstrapping AI Cognition (Los Gemelos)...")
 	budgetGate := ai.NewBudgetGate(10.0, 50.0) // $10/day, $50/month safety net
 	llmProvider := ai.NewOpenAIProvider(budgetGate)
+	// AI: Twins
+	perceiver := perception.NewPerceiver(eventLog, gameEngine, appLogger)
+	cognitor := cognition.NewCognitor(llmProvider, appLogger)
+	executor := action.NewExecutor(gameEngine.GetNoiseManager(), eventLog, hub, appLogger)
 
+	// Panóptico Worker (AI Orchestrator)
+	panopticonWorker := panopticon.NewWorker(eventLog, gameEngine, perceiver, cognitor, executor, appLogger)
+	panopticonWorker.Start(ctx)
+
+	// Old AI Mind (kept for API endpoint compatibility, will be removed later)
 	aiMind := twins.NewTwinsMind(eventLog, gameEngine, llmProvider, gameEngine.GetNoiseManager(), hub, appLogger)
 	aiMind.SetGameID("GAME_1")
 	go aiMind.Start(ctx)

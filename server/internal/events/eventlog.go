@@ -38,6 +38,7 @@ const (
 	EventTypeLootAcquired         EventType = "LOOT_ACQUIRED"
 	EventTypeItemTransfer         EventType = "ITEM_TRANSFER"
 	EventTypeItemConsumed         EventType = "ITEM_CONSUMED"
+	EventTypeRedPhoneMessage      EventType = "RED_PHONE_MESSAGE"
 )
 
 // AudioTorturePayload holds the details for unavoidable sound events
@@ -57,6 +58,11 @@ type DoorLockPayload struct {
 	CellID   string `json:"cell_id"` // "CELL_A", etc., or "ALL"
 	IsLocked bool   `json:"is_locked"`
 	Duration int    `json:"duration"` // locked duration in minutes, 0 means indefinite
+}
+
+// RedPhonePayload holds a message sent over the 24h Red Phone
+type RedPhonePayload struct {
+	Message string `json:"message"`
 }
 
 // GameEvent represents an immutable record of an action in the game.
