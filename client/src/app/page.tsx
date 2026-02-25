@@ -7,6 +7,7 @@ import { AdminPanel } from "@/components/admin/AdminPanel";
 import PollWidget from "@/components/admin/PollWidget";
 import VARReplay from "@/components/VARReplay";
 import Header from "@/components/Header";
+import PlayerActionPanel from "@/components/PlayerActionPanel";
 import { useGameEngine, GameEvent } from "@/hooks/useGameEngine";
 
 // Mock data for demonstration (would come from WebSocket in production)
@@ -34,7 +35,7 @@ export default function Home() {
     const [toasts, setToasts] = useState<{ id: string, message: string, type: string }[]>([]);
 
     // Live WebSocket connection to Go Engine
-    const { events, isConnected, triggerOracle, triggerTorture, createPoll, votePoll } = useGameEngine();
+    const { events, isConnected, sendAction, triggerOracle, triggerTorture, createPoll, votePoll, voteExpel } = useGameEngine();
 
     // Effect to catch new events and create toasts for significant ones
     useEffect(() => {
@@ -183,8 +184,10 @@ export default function Home() {
                             // Adding trigger callbacks mapped to the API
                             onTriggerOracle={(target, message) => triggerOracle(target, message)}
                             onTriggerTorture={(soundId) => triggerTorture(soundId)}
+                            voteExpel={voteExpel}
                         />
                         <PollWidget events={events} createPoll={createPoll} votePoll={votePoll} />
+                        <PlayerActionPanel prisoners={mockPrisoners} sendAction={sendAction} />
                     </div>
                 )}
                 {activeTab === "var" && (
