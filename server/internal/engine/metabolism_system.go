@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"github.com/MRamiBalles/CarcelGemelosJuego/server/internal/domain/item"
 	"github.com/MRamiBalles/CarcelGemelosJuego/server/internal/domain/prisoner"
 	"github.com/MRamiBalles/CarcelGemelosJuego/server/internal/events"
 	"github.com/MRamiBalles/CarcelGemelosJuego/server/internal/platform/logger"
@@ -13,12 +14,7 @@ type MetabolismSystem struct {
 	prisoners map[string]*prisoner.Prisoner
 }
 
-// ResourceIntakePayload defines what was consumed.
-type ResourceIntakePayload struct {
-	PrisonerID string `json:"prisoner_id"`
-	ItemType   string `json:"item_type"` // "WATER", "RICE", "SUSHI"
-	Amount     int    `json:"amount"`    // 1-100
-}
+// Removed ResourceIntakePayload (moved to inventory_system.go)
 
 // NewMetabolismSystem creates a new metabolism manager.
 func NewMetabolismSystem(eventLog *events.EventLog, log *logger.Logger) *MetabolismSystem {
@@ -91,11 +87,11 @@ func (ms *MetabolismSystem) OnTimeTick(event events.GameEvent) {
 	}
 }
 
-// OnResourceIntake handles eating/drinking.
-func (ms *MetabolismSystem) OnResourceIntake(event events.GameEvent) {
-	payload, ok := event.Payload.(ResourceIntakePayload)
+// OnItemConsumed handles the effects of eating/drinking items.
+func (ms *MetabolismSystem) OnItemConsumed(event events.GameEvent) {
+	payload, ok := event.Payload.(ItemConsumedPayload)
 	if !ok {
-		ms.logger.Error("Failed to parse ResourceIntakePayload")
+		ms.logger.Error("Failed to parse ItemConsumedPayload")
 		return
 	}
 
@@ -104,25 +100,31 @@ func (ms *MetabolismSystem) OnResourceIntake(event events.GameEvent) {
 		return
 	}
 
+	def, ok := item.GetItem(payload.ItemType)
+	if !ok {
+		ms.logger.Error("Unknown item type consumed: " + string(payload.ItemType))
+		return
+	}
+
 	// Mystic Logic: Cannot eat solids
 	if p.HasTrait(prisoner.TraitBreatharian) {
-		if payload.ItemType != "WATER" && payload.ItemType != "ELIXIR" {
+		if def.IsFood {
 			// VIOLATION!
 			p.Sanity -= 50
 			p.HP -= 20
 			ms.logger.Warn("MYSTIC VIOLATION: " + p.Name + " ate solid food!")
-			// Remove trait?
-			// p.RemoveTrait(TraitBreatharian) // Need RemoveTrait method
 			return
 		}
 	}
 
 	// Normal intake
-	if payload.ItemType == "WATER" {
-		p.Thirst += payload.Amount
-	} else {
-		p.Hunger += payload.Amount
-	}
+	totalNutrition := def.Nutrition * payload.Quantity
+	totalHydration := def.Hydration * payload.Quantity
+	totalSanityMod := def.SanityMod * payload.Quantity
+
+	p.Hunger += totalNutrition
+	p.Thirst += totalHydration
+	p.Sanity += totalSanityMod
 
 	// Cap at 100
 	if p.Thirst > 100 {
@@ -130,5 +132,12 @@ func (ms *MetabolismSystem) OnResourceIntake(event events.GameEvent) {
 	}
 	if p.Hunger > 100 {
 		p.Hunger = 100
+	}
+	if p.Sanity > 100 {
+		p.Sanity = 100
+	}
+	// Cap at 0 bottom
+	if p.Sanity < 0 {
+		p.Sanity = 0
 	}
 }

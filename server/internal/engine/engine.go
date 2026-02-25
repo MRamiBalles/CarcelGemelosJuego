@@ -26,6 +26,7 @@ type Engine struct {
 	pollingSystem    *PollingSystem
 	patioSystem      *PatioSystem
 	contrabandSystem *ContrabandSystem
+	inventorySystem  *InventorySystem
 
 	// State
 	lastProcessedEvent int
@@ -49,6 +50,7 @@ func NewEngine(eventLog *events.EventLog, log *logger.Logger) *Engine {
 		pollingSystem:    NewPollingSystem(eventLog, log),
 		patioSystem:      NewPatioSystem(eventLog, log),
 		contrabandSystem: NewContrabandSystem(eventLog, log),
+		inventorySystem:  NewInventorySystem(eventLog, log),
 
 		lastProcessedEvent: 0,
 		prisoners:          make(map[string]*prisoner.Prisoner),
@@ -84,6 +86,7 @@ func (e *Engine) RegisterPrisoner(p *prisoner.Prisoner) {
 	e.pollingSystem.RegisterPrisoner(p)
 	e.patioSystem.RegisterPrisoner(p)
 	e.contrabandSystem.RegisterPrisoner(p)
+	e.inventorySystem.RegisterPrisoner(p)
 	e.logger.Info("Prisoner registered with engine sub-systems: " + p.ID)
 }
 
@@ -163,8 +166,8 @@ func (e *Engine) dispatch(event events.GameEvent) {
 	case events.EventTypeToiletUse:
 		e.sanitySystem.OnToiletUseEvent(event)
 
-	case events.EventTypeResourceIntake:
-		e.metabolismSystem.OnResourceIntake(event)
+	case events.EventTypeItemConsumed:
+		e.metabolismSystem.OnItemConsumed(event)
 
 	case events.EventTypeInsult:
 		e.sanitySystem.OnInsultEvent(event)

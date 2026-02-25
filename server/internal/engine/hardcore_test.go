@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/MRamiBalles/CarcelGemelosJuego/server/internal/domain/item"
 	"github.com/MRamiBalles/CarcelGemelosJuego/server/internal/domain/prisoner"
 	"github.com/MRamiBalles/CarcelGemelosJuego/server/internal/events"
 	"github.com/MRamiBalles/CarcelGemelosJuego/server/internal/platform/logger"
@@ -100,17 +101,17 @@ func TestMysticDiet(t *testing.T) {
 	ms.RegisterPrisoner(mystic)
 
 	// Act: Eat Rice
-	payload := ResourceIntakePayload{
+	payload := ItemConsumedPayload{
 		PrisonerID: "MYSTIC_1",
-		ItemType:   "RICE",
-		Amount:     10,
+		ItemType:   item.ItemRice,
+		Quantity:   1,
 	}
 	event := events.GameEvent{
-		Type:    events.EventTypeResourceIntake,
+		Type:    events.EventTypeItemConsumed,
 		Payload: payload,
 	}
 
-	ms.OnResourceIntake(event)
+	ms.OnItemConsumed(event)
 
 	// Assert: Punishment
 	if mystic.Sanity == 100 {
