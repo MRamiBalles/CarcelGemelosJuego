@@ -69,6 +69,8 @@ func (e *Executor) Execute(ctx context.Context, decision *cognition.Decision) er
 		return e.executeReveal(decision)
 	case cognition.ActionReward:
 		return e.executeReward(decision)
+	case cognition.ActionRedPhoneMessage:
+		return e.executeRedPhoneMessage(decision)
 	case cognition.ActionDoNothing:
 		e.logger.Info("ACTION: Los Gemelos observe silently.")
 		return nil
@@ -228,5 +230,24 @@ func (e *Executor) executeLockdown(decision *cognition.Decision) error {
 
 	e.eventLog.Append(event)
 	e.logger.Info("ACTION: Global Lockdown triggered.")
+	return nil
+}
+
+// executeRedPhoneMessage sends a psychological or manipulative message over the 24h Red Phone.
+func (e *Executor) executeRedPhoneMessage(decision *cognition.Decision) error {
+	event := events.GameEvent{
+		ID:        events.GenerateEventID(),
+		Timestamp: time.Now(),
+		Type:      events.EventTypeRedPhoneMessage,
+		ActorID:   "SYSTEM_TWINS",
+		TargetID:  decision.Target,
+		Payload: events.RedPhonePayload{
+			Message: decision.Justification,
+		},
+		GameDay: e.currentDay,
+	}
+
+	e.eventLog.Append(event)
+	e.logger.Event("RED_PHONE", decision.Target, "Twins sent a message: "+decision.Justification)
 	return nil
 }

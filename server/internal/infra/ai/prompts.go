@@ -52,7 +52,7 @@ Siempre responde en JSON con este formato EXACTO:
     "violations": ["lista de reglas que serían violadas"]
   },
   "decision": {
-    "action_type": "NOISE_TORTURE|AUDIO_TORTURE|DOOR_LOCK|RESOURCE_CUT|REVEAL_SECRET|REWARD|OBSERVE",
+    "action_type": "NOISE_TORTURE|AUDIO_TORTURE|DOOR_LOCK|RESOURCE_CUT|REVEAL_SECRET|REWARD|RED_PHONE_MESSAGE|OBSERVE",
     "target": "ALL|BLOCK_A|prisoner_id",
     "intensity": 1-3,
     "justification": "Razón narrativa para la audiencia"
@@ -109,13 +109,14 @@ func ValidateDecisionResponse(resp *TwinsDecisionResponse) error {
 	}
 
 	validActions := map[string]bool{
-		"NOISE_TORTURE": true,
-		"AUDIO_TORTURE": true,
-		"DOOR_LOCK":     true,
-		"RESOURCE_CUT":  true,
-		"REVEAL_SECRET": true,
-		"REWARD":        true,
-		"OBSERVE":       true,
+		"NOISE_TORTURE":     true,
+		"AUDIO_TORTURE":     true,
+		"DOOR_LOCK":         true,
+		"RESOURCE_CUT":      true,
+		"REVEAL_SECRET":     true,
+		"REWARD":            true,
+		"RED_PHONE_MESSAGE": true,
+		"OBSERVE":           true,
 	}
 
 	if !validActions[resp.Decision.ActionType] {

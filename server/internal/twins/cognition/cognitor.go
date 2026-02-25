@@ -30,13 +30,14 @@ type Decision struct {
 
 // ActionType constants for Los Gemelos actions.
 const (
-	ActionNoise        = "NOISE_TORTURE"
-	ActionAudioTorture = "AUDIO_TORTURE"
-	ActionLockdown     = "DOOR_LOCK"
-	ActionResourceCut  = "RESOURCE_CUT"
-	ActionRevealSecret = "REVEAL_SECRET"
-	ActionReward       = "REWARD"
-	ActionDoNothing    = "OBSERVE"
+	ActionNoise           = "NOISE_TORTURE"
+	ActionAudioTorture    = "AUDIO_TORTURE"
+	ActionLockdown        = "DOOR_LOCK"
+	ActionResourceCut     = "RESOURCE_CUT"
+	ActionRevealSecret    = "REVEAL_SECRET"
+	ActionReward          = "REWARD"
+	ActionRedPhoneMessage = "RED_PHONE_MESSAGE"
+	ActionDoNothing       = "OBSERVE"
 )
 
 // Cognitor is the decision-making core of Los Gemelos.
@@ -248,6 +249,8 @@ func (c *Cognitor) buildJustification(state *perception.PrisonState, action stri
 		return fmt.Sprintf("Tensión actual: %s. Se requiere estímulo para mantener el interés narrativo.", state.TensionLevel)
 	case ActionRevealSecret:
 		return fmt.Sprintf("Traiciones recientes: %d. La audiencia merece transparencia.", state.RecentBetrayals)
+	case ActionRedPhoneMessage:
+		return "Comunicado directo del Panóptico vía Teléfono Rojo para manipular la situación."
 	case ActionDoNothing:
 		return "Los Gemelos observan. El drama se desarrolla orgánicamente."
 	default:
