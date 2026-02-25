@@ -126,7 +126,7 @@ func (c *Client) handlePlayerAction(action PlayerAction) {
 	case "USE_ORACLE":
 		c.handleOracle(actor, action.Payload)
 	case "GIVE_ELIXIR":
-		// TODO: Tartaria Elixir logic
+		c.handleGiveElixir(actor, action.Payload)
 	default:
 		c.hub.logger.Warn("Unknown PlayerAction type: " + action.Type)
 	}
@@ -359,6 +359,45 @@ func (c *Client) handleOracle(actor *prisoner.Prisoner, rawPayload []byte) {
 	c.hub.engine.GetEventLog().Append(event)
 	c.hub.logger.Event("ORACLE_USED", actor.ID, "Revealed painful truth to "+parsed.TargetID)
 	// Loyalty drop will be processed by Chaos/Social System
+}
+
+func (c *Client) handleGiveElixir(actor *prisoner.Prisoner, rawPayload []byte) {
+	// Only Mystic can use this
+	if actor.Archetype != prisoner.ArchetypeMystic {
+		return
+	}
+
+	var parsed struct {
+		TargetID string `json:"target_id"`
+	}
+	if err := json.Unmarshal(rawPayload, &parsed); err != nil {
+		return
+	}
+
+	// 50/50 Roulette
+	isPoison := rand.Float32() < 0.5
+
+	payload := events.ElixirPayload{
+		TargetID: parsed.TargetID,
+		IsPoison: isPoison,
+	}
+
+	event := events.GameEvent{
+		ID:        events.GenerateEventID(),
+		Timestamp: time.Now(),
+		Type:      events.EventTypeElixirGiven,
+		ActorID:   actor.ID,
+		TargetID:  parsed.TargetID,
+		Payload:   payload,
+		GameDay:   actor.DayInGame,
+	}
+	c.hub.engine.GetEventLog().Append(event)
+
+	resultMsg := "Healed target"
+	if isPoison {
+		resultMsg = "Poisoned target"
+	}
+	c.hub.logger.Event("ELIXIR_GIVEN", actor.ID, resultMsg+": "+parsed.TargetID)
 }
 
 // WritePump pumps messages from the hub to the websocket connection.

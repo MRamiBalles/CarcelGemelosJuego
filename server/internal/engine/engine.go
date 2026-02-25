@@ -203,6 +203,9 @@ func (e *Engine) dispatch(event events.GameEvent) {
 	case events.EventTypeItemConsumed:
 		e.metabolismSystem.OnItemConsumed(event)
 
+	case events.EventTypeElixirGiven:
+		e.metabolismSystem.OnElixirGiven(event)
+
 	case events.EventTypeInsult:
 		e.sanitySystem.OnInsultEvent(event)
 

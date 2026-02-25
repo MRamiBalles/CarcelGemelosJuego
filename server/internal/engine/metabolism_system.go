@@ -211,3 +211,49 @@ func (ms *MetabolismSystem) OnItemConsumed(event events.GameEvent) {
 		p.Sanity = 0
 	}
 }
+
+// OnElixirGiven handles the effects of Tartaria's Russian Roulette item.
+func (ms *MetabolismSystem) OnElixirGiven(event events.GameEvent) {
+	// Since event payload is serialized to JSON and then unmarshaled as map[string]interface{} globally,
+	// we should safely map it back, or assume it's events.ElixirPayload if we just appended it locally
+	// In the real system with DB rehydration, it's often a map[string]interface{}. Let's handle both.
+	var targetID string
+	var isPoison bool
+
+	switch p := event.Payload.(type) {
+	case events.ElixirPayload:
+		targetID = p.TargetID
+		isPoison = p.IsPoison
+	case map[string]interface{}:
+		if tid, ok := p["target_id"].(string); ok {
+			targetID = tid
+		}
+		if ip, ok := p["is_poison"].(bool); ok {
+			isPoison = ip
+		}
+	default:
+		ms.logger.Error("Failed to parse ElixirPayload")
+		return
+	}
+
+	target, exists := ms.prisoners[targetID]
+	if !exists {
+		return
+	}
+
+	if isPoison {
+		target.HP -= 50
+		target.AddState(prisoner.StateExhausted, 0)
+		ms.logger.Warn("ELIXIR POISON: " + targetID + " lost 50 HP and became Exhausted!")
+	} else {
+		target.HP += 30
+		target.Sanity += 30
+		if target.HP > 100 {
+			target.HP = 100
+		}
+		if target.Sanity > 100 {
+			target.Sanity = 100
+		}
+		ms.logger.Info("ELIXIR HEAL: " + targetID + " recovered 30 HP and 30 Sanity.")
+	}
+}

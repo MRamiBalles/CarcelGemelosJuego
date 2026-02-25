@@ -44,6 +44,7 @@ const (
 	EventTypeMeditate             EventType = "MEDITATE"
 	EventTypeOracleUse            EventType = "ORACLE_USE"
 	EventTypeAudienceExpulsion    EventType = "AUDIENCE_EXPULSION"
+	EventTypeElixirGiven          EventType = "ELIXIR_GIVEN"
 )
 
 // AudioTorturePayload holds the details for unavoidable sound events
@@ -86,6 +87,12 @@ type MeditatePayload struct {
 type OracleUsePayload struct {
 	TargetID string `json:"target_id"`
 	Secret   string `json:"secret"`
+}
+
+// ElixirPayload details Tartaria's roulette effect
+type ElixirPayload struct {
+	TargetID string `json:"target_id"`
+	IsPoison bool   `json:"is_poison"`
 }
 
 // GameEvent represents an immutable record of an action in the game.
