@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     reactStrictMode: true,
+    output: 'standalone',
     // Allow cross-origin WebSocket connections to the Go server
     async rewrites() {
         return [
