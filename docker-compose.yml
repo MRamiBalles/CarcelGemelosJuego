@@ -1,53 +1,13 @@
 # ============================================
-# T027: Docker Compose - Cárcel de los Gemelos
-# Single command to launch the entire prison
+# T027: Docker Compose - Cárcel de los Gemelos (Production)
+# Single command to launch the authoritative engine + frontend
 # ============================================
 
 version: '3.9'
 
 services:
   # ==========================================
-  # PostgreSQL - The Immutable Ledger
-  # ==========================================
-  postgres:
-    image: postgres:16-alpine
-    container_name: carcel_postgres
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER:-gemelos}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-secreto_carcel}
-      POSTGRES_DB: ${POSTGRES_DB:-carcel_gemelos}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./server/migrations:/docker-entrypoint-initdb.d:ro
-    ports:
-      - "5432:5432"
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U gemelos -d carcel_gemelos" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  # ==========================================
-  # Redis - State Cache & Pub/Sub
-  # ==========================================
-  redis:
-    image: redis:7-alpine
-    container_name: carcel_redis
-    restart: unless-stopped
-    command: redis-server --appendonly yes
-    volumes:
-      - redis_data:/data
-    ports:
-      - "6379:6379"
-    healthcheck:
-      test: [ "CMD", "redis-cli", "ping" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  # ==========================================
-  # Go Server - Los Gemelos Brain
+  # Go Server - Los Gemelos Brain (EventSourcing via SQLite)
   # ==========================================
   server:
     build:
@@ -56,25 +16,18 @@ services:
     container_name: carcel_server
     restart: unless-stopped
     environment:
-      # Database
-      DATABASE_URL: postgres://${POSTGRES_USER:-gemelos}:${POSTGRES_PASSWORD:-secreto_carcel}@postgres:5432/${POSTGRES_DB:-carcel_gemelos}?sslmode=disable
-      # Redis
-      REDIS_URL: redis://redis:6379
+      # Database Persistence
+      DB_PATH: "/data/jail.db"
       # Server
       PORT: 8080
       ENV: production
-      # LLM (Optional)
+      # LLM Models
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
-      # Shadow Mode (default: enabled for safety)
-      TWINS_SHADOW_MODE: ${TWINS_SHADOW_MODE:-true}
+    volumes:
+      - jail_data:/data
     ports:
       - "8080:8080"
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
     healthcheck:
       test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health" ]
       interval: 30s
@@ -100,17 +53,12 @@ services:
       - server
 
 # ==========================================
-# Persistent Volumes
+# Persistent Volumes (SQLite)
 # ==========================================
 volumes:
-  postgres_data:
-    driver: local
-  redis_data:
+  jail_data:
     driver: local
 
-# ==========================================
-# Networks (optional, Docker Compose creates default)
-# ==========================================
 networks:
   default:
     name: carcel_network

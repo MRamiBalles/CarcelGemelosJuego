@@ -8,8 +8,8 @@ FROM golang:1.22-alpine AS builder
 
 WORKDIR /app
 
-# Install build dependencies
-RUN apk add --no-cache git ca-certificates
+# Install build dependencies including gcc for SQLite CGO
+RUN apk add --no-cache git ca-certificates gcc musl-dev
 
 # Copy go mod files first (cache dependencies)
 COPY go.mod go.sum ./
@@ -18,10 +18,10 @@ RUN go mod download
 # Copy source code
 COPY . .
 
-# Build with optimizations
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
-    -ldflags="-w -s -X main.Version=$(git describe --tags --always --dirty 2>/dev/null || echo 'dev')" \
-    -o /server ./cmd/server
+# Build with CGO enabled for SQLite
+RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build \
+    -ldflags="-w -s" \
+    -o /server ./cmd/jail-server
 
 # ============================================
 # Stage 2: Runtime (Distroless for security)
